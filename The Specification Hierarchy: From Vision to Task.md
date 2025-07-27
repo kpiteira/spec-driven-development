@@ -68,4 +68,47 @@ This structure serves as the "single source of truth" for both human architects 
 
 ## 6. Task Blueprint (`specs/tasks/TASK-XXX.md`)
 
-* **Purpose:** The "Atomic Unit of Work." This is the final, most granular level, as defined in the `How It Works` document. It's the direct input for the "Assembly Line" and contains everything a single agent needs to
+* **Purpose:** The "Atomic Unit of Work." This is the final, most granular level, as defined in the `How It Works` document. It's the direct input for the "Assembly Line" and contains everything a single agent needs to perform its function perfectly.
+
+---
+
+## A Living Specification: The Evolution of Artifacts
+
+Specification documents are not static. They must evolve as the project matures and we learn from user feedback. However, this evolution must be structured to prevent chaos. The core principle is **stability at the top, dynamism at the bottom**.
+
+### 1. Project Vision (`Project_Vision.md`)
+
+* **Evolution Speed:** Glacial. This is the bedrock of the project.
+* **Lifecycle:** It should be considered **immutable** for most of the project's life.
+* **Triggers for Change:** Only a fundamental strategic pivot (e.g., changing target market, company exits a business line). This is a rare, "break glass" event.
+* **Process:** Requires a formal re-founding of the project with all key stakeholders. All downstream documents must be reviewed for compliance with the new vision.
+
+### 2. Architectural Specification (`specs/Architecture.md`)
+
+* **Evolution Speed:** Slow and deliberate.
+* **Lifecycle:** Evolves incrementally to adapt to new learnings and technologies without altering core principles.
+* **Triggers for Change:** A new technology is approved for the stack; a significant technical challenge reveals the need for a new design pattern; a new non-functional requirement is introduced.
+* **Process:** Changes are managed via **Architecture Decision Records (ADRs)**. A proposed change is drafted as an ADR, reviewed by the team, and if approved, the main document is updated. This creates a historical log of *why* changes were made.
+
+### 3. Product Requirements Document (`Product_Requirements.md`)
+
+* **Evolution Speed:** Dynamic. This is a living document.
+* **Lifecycle:** Changes are driven by the Roadmap Evolution Cycle. It reflects our most current understanding of user needs.
+* **Triggers for Change:** A feature's priority changes during a roadmap review; a user story needs to be fleshed out with acceptance criteria as it moves towards implementation; a feature is deprecated.
+* **Process:**
+  * **Adding:** New ideas are captured as simple user stories and prioritized on the roadmap.
+  * **Changing:** Modifications to existing requirements are approved during the roadmap review.
+  * **Deprecating:** Do not delete old requirements. Move them to an "Archived" section with a note explaining *why* they were deprecated to preserve project history.
+
+### 4. Project Roadmap (`Roadmap.md`)
+
+* **Evolution Speed:** Rhythmic. It changes at predictable intervals.
+* **Lifecycle:** This is the engine of change for the PRD. It evolves via the **"Review, Refine, Re-commit"** cycle.
+* **Triggers for Change:** The primary trigger is the **completion of a milestone**. Exceptional triggers include critical user feedback or major market shifts.
+* **Process:** The "Human Architect" leads a review after each milestone to analyze feedback, assess the next milestone's priority, and update the `Roadmap.md` accordingly.
+
+### 5. Milestone Plan (`specs/milestones/M1_MVP_Plan.md`)
+
+* **Evolution Speed:** None. It is **immutable** once active.
+* **Lifecycle:** A Milestone Plan is a point-in-time artifact. It is **created** at the start of a milestone, **executed** by the `Supervisor Agent`, and **archived** upon completion.
+* **Process:** It does not evolve. Its purpose is to be a clear, stable set of instructions for the current block of work. Learnings from a milestone are used to inform the creation of the *next* Milestone Plan, not to alter the one in progress.
