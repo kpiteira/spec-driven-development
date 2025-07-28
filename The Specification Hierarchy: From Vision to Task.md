@@ -61,14 +61,14 @@ This structure serves as the "single source of truth" for both human architects 
 * **Purpose:** A detailed, tactical plan for a single milestone from the Roadmap. This is what the `Supervisor Agent` would consume to begin its work.
 * **Contents:**
   * **Milestone-Specific Goals:** What does success look like for this specific milestone?
-  * **Implementation Plan:** A sequenced, ordered list of the tasks required to complete the milestone's features. This list directly generates the `Task Blueprints`.
-  * **Testing Plan:** The specific testing strategy for this milestone. This provides the rules for the `Validator Agent`. (e.g., "All new API endpoints must have >90% unit test coverage," "A full end-to-end test will be run for the user registration flow.").
+  * **Implementation Plan:** The work is broken down into a sequence of **Vertical Slices**. Each slice is a testable, demonstrable piece of end-to-end functionality, containing its own small, ordered list of tasks. This structure is the direct input for the `Supervisor Agent`.
+  * **Testing Plan:** The high-level testing strategy for the milestone, including the integration tests for each vertical slice.
 
 ---
 
 ## 6. Task Blueprint (`specs/tasks/TASK-XXX.md`)
 
-* **Purpose:** The "Atomic Unit of Work." This is the final, most granular level, as defined in the `How It Works` document. It's the direct input for the "Assembly Line" and contains everything a single agent needs to perform its function perfectly.
+* **Purpose:** The "Atomic Unit of Work." This is the final, most granular level, defining the **contract** for a single component. It contains the goal and a set of testable requirements that the `Coder Agent` must fulfill. It is the direct input for the "Assembly Line."
 
 ---
 
