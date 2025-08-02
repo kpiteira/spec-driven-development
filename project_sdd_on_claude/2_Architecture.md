@@ -1,0 +1,880 @@
+# Architectural Specification: SDD System for Claude Code
+
+**Purpose of this document:** This document outlines the technical architecture for the Spec-Driven Development (SDD) System as implemented on the Claude Code platform. It serves as the engineering team's blueprint, defining the high-level structure, technology stack, design patterns, and infrastructure. Its goal is to ensure the system is built in a way that is scalable, maintainable, and aligned with the product requirements.
+
+**Link to Requirements:** `[Link to 1_Product_Requirements.md]`
+
+---
+
+## 1. Architectural Goals and Constraints
+
+**What it is:** This section describes the primary drivers and limitations that shape the architecture. It directly translates the Non-Functional Requirements (NFRs) from the PRD into architectural principles.
+
+| Goal / Constraint                    | Driving NFRs                               | Description                                                                                                           |
+| ------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Goal: Platform-Native Integration**| `NFR-INT-001 (Claude Code Integration)`    | Architecture must leverage Claude Code's native features (commands, sub-agents, hooks) without external dependencies.  |
+| **Goal: Deterministic Execution**    | `NFR-REL-001 (Reliability)`                | Each workflow must produce consistent, predictable results given the same inputs and specifications.                   |
+| **Goal: Contextual Isolation**       | `NFR-PERF-001 (Context Management)`        | Sub-agents must operate with clean, focused contexts to prevent degradation and hallucination.                        |
+| **Goal: Stateless Workflows**        | `NFR-SCALE-001 (Scalability)`              | All workflows must be stateless, deriving state from the file system to enable parallel execution.                    |
+| **Constraint: File-Based State**     | `Claude Code Platform`                      | All system state must be persisted as files in the workspace; no external databases or services.                      |
+| **Constraint: Single Language**      | `Team Skills, Platform Support`             | System configuration and orchestration logic must be expressed through Claude Code's native formats (Markdown with frontmatter, JSON for hooks).         |
+| **Constraint: No External APIs**     | `Security, Platform Limitations`            | The system cannot make external HTTP calls; all operations must be self-contained within the workspace.               |
+
+---
+
+## 2. System Architecture Overview
+
+**What it is:** A high-level, visual representation of the system's structure using the C4 model's Container diagram level.
+
+```mermaid
+graph TB
+    subgraph "Human Layer"
+        H[Human Architect]
+    end
+
+    subgraph "Claude Code Platform"
+        CLI[Claude Code CLI]
+        CMD[Command System]
+        
+        subgraph "Orchestration Layer"
+            ORCH[Orchestrator Agent]
+        end
+        
+        subgraph "Specialist Agents"
+            BUNDLE[Bundler Agent]
+            SEC[Security Consultant]
+            VALID[Validator Agent]
+        end
+    end
+
+    subgraph "Workspace Layer"
+        subgraph "Specification Store"
+            SPECS["/specs/*.md"]
+            TMPL["/specs/templates/*.md"]
+            MILE["/specs/milestones/*.md"]
+            TASK["/specs/tasks/*.md"]
+        end
+        
+        subgraph "Working Store"
+            WORK["/.task_bundles/"]
+            CONF["/quality.toml"]
+        end
+        
+        subgraph "Output Store"
+            SRC["/src/"]
+            TEST["/test/"]
+        end
+    end
+
+    H -->|"Commands"| CLI
+    CLI -->|"Routes"| CMD
+    CMD -->|"Invokes"| ORCH
+    ORCH -->|"Delegates"| BUNDLE
+    ORCH -->|"Delegates"| SEC
+    ORCH -->|"Delegates"| VALID
+    
+    ORCH -.->|"R/W"| SPECS
+    ORCH -.->|"R/W"| WORK
+    BUNDLE -.->|"R"| SPECS
+    BUNDLE -.->|"W"| WORK
+    SEC -.->|"R"| SPECS
+    SEC -.->|"W"| WORK
+    VALID -.->|"R"| WORK
+    VALID -.->|"R"| CONF
+    
+    ORCH -.->|"W"| SRC
+    ORCH -.->|"W"| TEST
+```
+
+**Description:** The system consists of three primary layers:
+
+1. **Human Layer:** The Human Architect interacts with the system through Claude Code CLI commands.
+2. **Claude Code Platform:** Contains the command routing system and the agent orchestration layer, with specialized sub-agents for different concerns.
+3. **Workspace Layer:** The file system serves as the persistent state store, divided into specifications, working directories, and output artifacts.
+
+---
+
+## 3. Technology Stack
+
+**What it is:** A definitive list of the approved technologies, frameworks, and major libraries for the project.
+
+| Category               | Technology              | Justification                                                          |
+| ---------------------- | ----------------------- | ---------------------------------------------------------------------- |
+| **Platform**           | Claude Code             | Target deployment platform with native agent support.                   |
+| **Commands**           | [Slash Commands](https://docs.anthropic.com/en/docs/claude-code/slash-commands) | **Primary workflow triggers** - Native command system stored as Markdown files (`.claude/commands/*.md`) that orchestrate all SDD workflows (`/init_greenfield`, `/task`, `/milestone`, etc.) |
+| **Agent Orchestration**| [Sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) | Native sub-agent system defined as Markdown files with YAML frontmatter (`.claude/agents/*.md`) for specialized tasks |
+| **Event System**       | [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) | Native hook system configured via JSON in settings files (`.claude/settings.json`) for observability and logging |
+| **Specification**      | Markdown                | Human-readable, version-controllable format for all specification documents      |
+| **Quality Config**     | TOML                    | Configuration format for quality checks and validation rules (`quality.toml`)           |
+| **Diagramming**        | Mermaid                 | Embedded diagrams in Markdown for architecture visualization           |
+
+**System-Specific Configuration Details:**
+
+- **Slash Commands**: **THE PRIMARY INTERFACE** for all SDD workflows. Defined as Markdown files with optional YAML frontmatter for metadata (tools, description, model). Each command orchestrates specific workflows by invoking sub-agents in predetermined sequences.
+- **Sub-agents**: Markdown files with YAML frontmatter containing name, description, and tool restrictions. Invoked by slash commands to perform specialized tasks.
+- **Hooks**: JSON configuration in settings files supporting multiple event types for passive observability and logging (NOT workflow control).
+- **File-Based Architecture**: All system configuration and state uses standard file formats stored in the workspace
+
+---
+
+## 4. Slash Command Architecture
+
+**What it is:** The primary user interface and workflow orchestration system for all SDD operations.
+
+### 4.1 Command Hierarchy
+
+**Core SDD Commands:**
+
+| Command                  | Purpose                                          | Workflow Orchestrated                    |
+| ------------------------ | ------------------------------------------------ | ---------------------------------------- |
+| `/init_greenfield`       | Initialize new SDD project from scratch         | Project setup → Template generation → Initial specs |
+| `/init_brownfield`       | Adopt SDD for existing project                  | Project analysis → Spec generation → Integration |
+| `/milestone MILESTONE-ID`| Execute a complete milestone                     | Task generation → Sequential task execution |
+| `/task TASK-ID`          | Execute a single development task               | Research → Security → Implementation → Validation |
+| `/spec_update TYPE`      | Update specification documents                   | Template validation → Content generation |
+
+### 4.2 Command-to-Agent Orchestration
+
+**How Slash Commands Work:**
+
+1. **User Invocation**: Human architect types slash command (e.g., `/task TASK-001`)
+2. **Command Processing**: Claude Code routes to appropriate command definition (`.claude/commands/task.md`)
+3. **Workflow Orchestration**: Command invokes Orchestrator Agent with specific parameters
+4. **Agent Delegation**: Orchestrator sequentially invokes specialist sub-agents (Bundler → Security → Coder → Validator)
+5. **Result Delivery**: Orchestrator returns success/failure status to command, which reports to user
+
+### 4.3 Command Definition Structure
+
+**Standard Command File Format:**
+
+```markdown
+---
+name: "task"
+description: "Execute a single development task following SDD methodology"
+tools: ["create_file", "replace_string_in_file", "run_in_terminal", "semantic_search"]
+model: "claude-3-5-sonnet-20241022"
+---
+
+# Task Execution Command
+
+Execute a development task following the SDD Assembly Line Pattern.
+
+## Usage
+`/task TASK-ID`
+
+## Parameters
+- `TASK-ID`: The identifier of the task to execute (must exist in `/specs/tasks/`)
+
+## Workflow
+1. Validate Task Blueprint exists
+2. Invoke Orchestrator Agent with task parameters
+3. Monitor agent workflow progress
+4. Report final status to user
+```
+
+**Key Principles:**
+
+- **Single Entry Point**: Each command is the sole entry point for its workflow
+- **Agent Orchestration**: Commands don't implement logic - they orchestrate agents
+- **Parameter Validation**: Commands validate inputs before delegating to agents
+- **Status Reporting**: Commands provide user feedback and error handling
+
+---
+
+## 5. Key Design Patterns & Conventions
+
+**What it is:** Mandatory patterns and conventions to ensure the codebase is consistent, predictable, and maintainable.
+
+### Agent Design Patterns
+
+- **Single Responsibility Principle:** Each agent must have exactly one well-defined purpose. Complex workflows are achieved through orchestration, not monolithic agents.
+- **Context Isolation:** Agents receive their primary working context through the Task Bundle directory, but may access filesystem resources as needed for their specific responsibilities (e.g., Bundler reads specifications and codebase, Coder reads/writes source files).
+- **Fail-Fast Validation:** Agents must validate their inputs immediately and fail with descriptive errors rather than attempting partial completion.
+- **Deterministic Interfaces:** While LLM outputs may vary, agents must provide consistent input/output interfaces and error handling patterns.
+
+### Workflow Patterns
+
+- **Assembly Line Pattern:** Tasks flow through a predetermined sequence of specialized agents, with support for iteration and refinement cycles when quality standards are not initially met.
+- **Bundle Enrichment:** Each agent in the workflow adds context and artifacts to the Task Bundle, creating a comprehensive workspace for downstream agents.
+- **Quality-Gated Commits:** The Orchestrator only commits work that passes all validation checks, though this may result in larger, more comprehensive commits.
+
+### Configuration Patterns
+
+- **Convention over Configuration:** Standard file locations and naming conventions reduce the need for explicit configuration.
+- **Declarative Commands:** All custom commands are defined declaratively in Markdown without imperative logic.
+- **Template-Driven Generation:** All specification documents must be created from templates to ensure consistency.
+
+---
+
+## 6. Data Management
+
+**What it is:** How data is stored, managed, and accessed within the system.
+
+### Specification Hierarchy
+
+```mermaid
+graph TD
+    VISION[Project Vision]
+    PRD[Product Requirements]
+    ARCH[Architecture]
+    ROAD[Roadmap]
+    MILE[Milestone Plans]
+    TASK[Task Blueprints]
+    
+    VISION --> PRD
+    PRD --> ARCH
+    PRD --> ROAD
+    ARCH --> MILE
+    ROAD --> MILE
+    MILE --> TASK
+```
+
+### File System Structure
+
+- **Living Specifications:** Specification documents evolve throughout the project lifecycle as described in the Specification Hierarchy, with controlled versioning and change management.
+- **Temporal Isolation:** Task Bundles exist in timestamped directories to prevent conflicts during parallel execution.
+- **Hierarchical Organization:** Files are organized by type and scope (project → milestone → task).
+
+### State Management
+
+- **Stateless Agents:** Agents derive all necessary state from their input bundle and produce output as new files.
+- **Simple Coordination:** Inter-agent coordination relies on file system conventions and sequential execution rather than complex locking mechanisms.
+- **Audit Trail:** All modifications are tracked through Git commits with standardized messages.
+
+---
+
+## 7. Component Specifications
+
+**What it is:** Detailed specifications for each system component, defining their responsibilities, inputs, outputs, and interfaces.
+
+### 7.1 Orchestrator Agent (Supervisor Agent)
+
+**Responsibility:** Manages the overall task lifecycle and coordinates specialist agents.
+
+**Inputs:**
+
+- Task Blueprint (`Task_Blueprint.md`)
+- Target Task Bundle directory path
+
+**Outputs:**
+
+- Completed implementation in `/src/` and `/test/`
+- Git commit with standardized message
+- Task status (pass/fail)
+
+**Key Operations:**
+
+1. Creates temporary Task Bundle directory (`.task_bundles/TASK-ID/`)
+2. Copies Task Blueprint into bundle
+3. Sequentially invokes specialist agents
+4. Commits successful work or halts on failure
+
+### 7.2 Bundler Agent
+
+**Responsibility:** Research and context preparation to prevent hallucination and context loss.
+
+**Inputs:**
+
+- Task Bundle directory path
+- Access to `/specs/Architecture.md`
+- Access to existing codebase
+
+**Outputs:**
+
+- `bundle_architecture.md` - Relevant architectural rules for the task
+- `bundle_code_context.md` - Exact signatures and documentation of relevant existing code
+- Additional context files as needed
+
+**Key Operations:**
+
+1. **Architectural Analysis:** Extract specific rules from Architecture.md relevant to the task
+2. **Codebase Intelligence:** Perform semantic search to find relevant internal code
+3. **Interface Extraction:** Extract exact function signatures, arguments, and documentation
+4. **External Knowledge Integration:** Fetch relevant API documentation for third-party libraries
+5. **Context Assembly:** Create structured context files in the Task Bundle
+
+### 7.3 Security Consultant Agent
+
+**Responsibility:** Provide proactive security guidance for the specific task.
+
+**Inputs:**
+
+- Task Bundle directory path
+- Task Blueprint content
+
+**Outputs:**
+
+- `bundle_security.md` - Specific, actionable security advice for the task
+
+**Key Operations:**
+
+1. Analyze task requirements for security implications
+2. Generate task-specific security guidance
+3. Add security considerations to Task Bundle
+
+### 7.4 Coder Agent
+
+**Responsibility:** Implementation and testing following TDD principles.
+
+**Inputs:**
+
+- Task Bundle directory with all context files
+- Task Blueprint with requirements
+
+**Outputs:**
+
+- Implementation code
+- Unit tests (written first, following TDD)
+- Implementation plan documentation
+
+**Key Operations:**
+
+1. Read Task Blueprint and all `bundle_*.md` files
+2. Devise step-by-step implementation plan
+3. Write failing unit tests that reflect task contract
+4. Implement code to make tests pass
+5. Adhere to all architectural and security guidance
+
+### 7.5 Validator Agent
+
+**Responsibility:** Comprehensive quality assurance and verification.
+
+**Inputs:**
+
+- Task Bundle directory
+- `/quality.toml` configuration
+- Task Blueprint verification context
+- Milestone Plan integration tests (if applicable)
+
+**Outputs:**
+
+- Single pass/fail verdict
+- Detailed failure report (if applicable)
+
+**Key Operations:**
+
+1. **Test Plan Assembly:** Combine verification context, integration tests, and quality checks
+2. **Execution:** Run linting, security scanning, unit tests, and integration tests
+3. **Reporting:** Provide precise failure details or success confirmation
+
+## 8. Workflow Specifications
+
+**What it is:** The detailed step-by-step process for task execution.
+
+### 8.1 Core Task Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant H as Human
+    participant O as Orchestrator
+    participant B as Bundler
+    participant S as Security Consultant
+    participant C as Coder
+    participant V as Validator
+    participant FS as File System
+
+    H->>O: /task TASK-ID
+    O->>FS: Create .task_bundles/TASK-ID/
+    O->>FS: Copy Task_Blueprint.md to bundle
+    
+    O->>B: Process Task Bundle
+    B->>FS: Read specs/Architecture.md
+    B->>FS: Search existing codebase
+    B->>FS: Write bundle_architecture.md
+    B->>FS: Write bundle_code_context.md
+    B-->>O: Bundle enriched
+    
+    O->>S: Process Task Bundle
+    S->>FS: Read Task_Blueprint.md
+    S->>FS: Write bundle_security.md
+    S-->>O: Security guidance added
+    
+    O->>C: Implement task
+    C->>FS: Read all bundle files
+    C->>FS: Write failing tests
+    C->>FS: Write implementation
+    C-->>O: Implementation complete
+    
+    O->>V: Validate implementation
+    V->>FS: Read quality.toml
+    V->>FS: Run all checks
+    alt Validation passes
+        V-->>O: PASS
+        O->>FS: Git commit
+        O->>FS: Delete task bundle
+        O-->>H: Task complete
+    else Validation fails
+        V-->>O: FAIL + details
+        O->>FS: Preserve task bundle for debugging
+        O-->>H: Task failed with details
+    end
+```
+
+### 8.2 Task Bundle Structure
+
+**Standard Task Bundle Contents:**
+
+```text
+.task_bundles/TASK-ID/
+├── Task_Blueprint.md           # Original task specification
+├── bundle_architecture.md      # Relevant architectural rules
+├── bundle_code_context.md      # Existing code interfaces
+├── bundle_security.md          # Security guidance
+└── [additional context files]  # As needed by Bundler
+```
+
+### 8.3 Agent Communication Protocol
+
+**All agent communication follows this pattern:**
+
+1. **Input:** Task Bundle directory path passed as argument
+2. **Context:** Agent reads required files from bundle and specifications
+3. **Processing:** Agent performs its specialized function
+4. **Output:** Agent writes new files to Task Bundle (never modifies existing)
+5. **Completion:** Agent signals completion to Orchestrator
+
+### 8.4 Task Bundle Cleanup
+
+**Bundle Lifecycle Management:**
+
+- **Success Path:** On successful task completion and validation, the Orchestrator deletes the entire Task Bundle directory (`.task_bundles/TASK-ID/`) to maintain workspace cleanliness
+- **Failure Path:** On task failure, the Task Bundle is preserved for debugging and manual inspection
+- **Manual Cleanup:** Developers can manually remove failed bundles once issues are resolved
+- **Bundle Retention:** No automatic cleanup of failed bundles - they serve as debugging artifacts
+
+### 8.4 Task Bundle Content Specifications
+
+**What it is:** Detailed specifications for the content structure and creation process of each bundle file, ensuring comprehensive context delivery to the Coder Agent.
+
+#### 8.4.1 Bundle File Content Structure
+
+**`bundle_architecture.md` Structure:**
+
+````markdown
+# Architectural Context for [TASK-ID]
+
+## Existing Patterns Found
+- **Pattern Name:** [e.g., "Async API Status System"]
+  - **Location:** `src/core/async_status.py`
+  - **Usage:** Use this existing pattern, do not create new status handling
+  - **Key Components:** StatusManager class, status_tracker() function
+
+## Relevant Architectural Rules
+- **Technology Constraints:** [Extracted from Architecture.md]
+- **Design Patterns:** [Mandatory patterns for this task type]
+- **Quality Standards:** [Non-functional requirements applicable to task]
+
+## Implementation Guidance
+- **Preferred Approaches:** [Specific guidance for this task]
+- **Anti-Patterns:** [What NOT to do based on existing codebase]
+````
+
+**`bundle_code_context.md` Structure:**
+
+````markdown
+# Code Context for [TASK-ID]
+
+## Internal Dependencies
+### [Module/Class Name]
+```python
+# Exact signature with full docstring
+def method_name(param1: Type, param2: Type) -> ReturnType:
+    """Complete docstring with usage examples"""
+```
+
+- **Location:** `src/path/to/module.py:line_number`
+- **Usage Example:** [Actual usage from codebase]
+
+## External Dependencies
+
+### [Library Name] (version X.Y.Z)
+
+- **Required Methods:**
+
+```python
+# Exact API signatures from documentation
+library.method(param: type) -> return_type
+```
+
+- **Usage Patterns:** [How it's currently used in project]
+
+## Database Schemas
+
+- **Tables/Models:** [Relevant schema definitions]
+- **Relationships:** [Key foreign keys and constraints]
+
+## API Contracts
+
+- **Endpoints:** [Existing API patterns to follow]
+- **Request/Response Formats:** [Established schemas]
+````
+
+**`bundle_security.md` Structure:**
+
+````markdown
+# Security Guidance for [TASK-ID]
+
+## Risk Assessment
+- **Data Sensitivity:** [Classification of data handled]
+- **Attack Surface:** [Potential entry points]
+- **Trust Boundaries:** [Where validation is critical]
+
+## Specific Threats
+- **[Threat Category]:** [e.g., "Input Validation"]
+  - **Risk:** SQL injection, XSS, command injection
+  - **Mitigation:** Use parameterized queries, input sanitization
+  - **Implementation:** [Specific code patterns to use]
+
+## Implementation Requirements
+- **Authentication:** [Required auth patterns]
+- **Authorization:** [Permission checking requirements]
+- **Data Protection:** [Encryption, hashing requirements]
+- **Logging:** [Security event logging requirements]
+
+## Testing Recommendations
+- **Security Test Cases:** [Specific tests to include]
+- **Edge Cases:** [Security-relevant boundary conditions]
+````
+
+#### 8.4.2 Bundler Agent Research Process
+
+**Implementation Hypothesis Generation:**
+
+1. **Task Analysis:** Parse task requirements to identify implementation categories (auth, data access, API endpoints, CLI commands, etc.)
+2. **Pattern Recognition:** Determine what existing patterns might be relevant
+3. **Dependency Prediction:** Identify likely internal and external dependencies
+
+**Context Extraction Strategy:**
+
+1. **Existing Pattern Discovery:**
+   - Use Serena MCP for semantic search of similar implementations
+   - Extract exact locations, signatures, and usage patterns
+   - Identify anti-patterns (what NOT to recreate)
+
+2. **Internal Code Intelligence:**
+   - Search for relevant functions, classes, and modules
+   - Extract precise method signatures with full docstrings
+   - Include usage examples from existing codebase
+   - Map database schemas and API contracts
+
+3. **External Dependency Research:**
+   - Scan existing code for used libraries and their versions
+   - Use Context7 MCP to fetch version-specific documentation
+   - Focus on methods/APIs actually used in the project
+   - Extract exact signatures and usage patterns
+
+**Relevance Determination:**
+
+- **Category-Based Search:** Identify task categories (authentication → search for auth patterns)
+- **Semantic Similarity:** Let Serena MCP find semantically related code
+- **Dependency Analysis:** Follow import chains and usage patterns
+- **Pattern Matching:** Look for established architectural patterns in the codebase
+
+#### 8.4.3 MCP Integration Specifications
+
+**Serena MCP (Semantic Search):**
+
+- **Usage:** Bundler Agent invokes when it needs to find similar implementations
+- **Query Strategy:** LLM determines specific search queries based on task analysis
+- **Balance:** Semantic search naturally finds relevant code without information overload
+
+**Context7 MCP (3rd Party Dependencies):**
+
+- **Usage:** Research documentation for libraries found in existing code
+- **Version Focus:** Always target the specific version used in the project
+- **Scope:** Extract documentation for methods/APIs actually used, not entire libraries
+
+#### 8.4.4 Bundle Validation Rules
+
+**Complete Bundle Requirements:**
+
+- `bundle_architecture.md` must include at least one existing pattern or explicit guidance
+- `bundle_code_context.md` must provide signatures for all anticipated dependencies
+- `bundle_security.md` must assess task-specific risks and provide actionable guidance
+- All bundle files must be structured according to the defined templates
+- Bundle must be self-contained (Coder Agent should not need additional research)
+
+---
+
+## 10. Hook Integration Strategy
+
+**What it is:** Strategic use of Claude Code's native hook system for observability, logging, and notifications within the SDD workflow.
+
+### 10.1 Hook Event Utilization
+
+The SDD system uses Claude Code hooks for **passive monitoring and observability**, not for triggering workflows (which are handled by slash commands and sub-agents).
+
+#### SessionStart Hooks
+
+**Purpose:** Initialize observability context and load project status for visibility.
+
+**Use Cases:**
+
+- Log session start with current milestone and project context
+- Load project status summary for display in transcript mode
+- Initialize observability tracking for the session
+
+#### UserPromptSubmit Hooks
+
+**Purpose:** Log user interactions and add helpful context without blocking workflows.
+
+**Use Cases:**
+
+- Log user commands for analytics and debugging
+- Add current SDD project context to help Claude understand project state
+- Track user workflow patterns for process improvement
+
+#### PostToolUse Hooks
+
+**Purpose:** Log and monitor tool usage for observability and quality tracking.
+
+**Use Cases:**
+
+- Log file modifications for audit trails
+- Track task progress and milestone advancement
+- Monitor sub-agent performance and context usage
+- Generate quality metrics (test coverage, code changes, etc.)
+
+#### SubagentStop Hooks
+
+**Purpose:** Monitor and log sub-agent performance and workflow health.
+
+**Use Cases:**
+
+- Log sub-agent completion times and success rates
+- Track context sizes and performance metrics
+- Monitor workflow bottlenecks and failure patterns
+- Generate workflow analytics for process improvement
+
+#### Stop Hooks
+
+**Purpose:** Session summary and final logging for observability.
+
+**Use Cases:**
+
+- Generate session summaries (tasks completed, files modified, etc.)
+- Log final project state changes
+- Update project dashboards and status tracking
+- Generate developer productivity metrics
+
+### 10.2 Hook Configuration Examples
+
+**Observability-Focused Hook Configuration:**
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sdd-session-logger.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "create_file|replace_string_in_file|run_in_terminal",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sdd-activity-logger.py"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sdd-performance-tracker.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/sdd-session-summary.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 10.3 Hook Script Organization
+
+**Simplified Hook Directory Structure:**
+
+```text
+.claude/hooks/
+├── sdd-session-logger.py      # SessionStart: Log session context
+├── sdd-activity-logger.py     # PostToolUse: Track file/tool activity  
+├── sdd-performance-tracker.py # SubagentStop: Monitor agent performance
+├── sdd-session-summary.py     # Stop: Generate session summaries
+└── lib/
+    ├── sdd_logging.py         # Shared logging utilities
+    └── metrics_collector.py   # Performance and quality metrics
+```
+
+### 10.4 Hook Implementation Patterns
+
+**Standard Hook Input Processing:**
+
+```python
+#!/usr/bin/env python3
+import json
+import sys
+from pathlib import Path
+from datetime import datetime
+
+# Standard observability hook pattern
+try:
+    hook_data = json.load(sys.stdin)
+    session_id = hook_data.get("session_id")
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", "."))
+    hook_event = hook_data.get("hook_event_name")
+    
+    # Log the event for observability
+    log_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "session_id": session_id,
+        "event": hook_event,
+        "project": project_dir.name
+    }
+    
+    # Write to observability log (never blocks workflow)
+    with open(project_dir / ".sdd" / "logs" / "hooks.jsonl", "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+        
+except Exception as e:
+    # Hooks should never fail the workflow - log and continue
+    print(f"Hook logging error: {e}", file=sys.stderr)
+    
+# Always exit 0 - hooks are for observability, not control
+sys.exit(0)
+```
+
+**Key Principles:**
+
+- **Non-blocking:** Hooks never prevent workflows from proceeding
+- **Observability-focused:** Used for logging, metrics, and notifications only  
+- **Fail-safe:** Errors in hooks don't impact the main workflow
+- **Lightweight:** Minimal processing to avoid performance impact
+
+---
+
+## 11. Cross-Cutting Concerns
+
+**What it is:** Architectural decisions that affect all components of the system.
+
+### Error Handling
+
+- **Structured Errors:** All agents must return errors in a consistent JSON format with error codes, messages, and context.
+- **Error Propagation:** Errors bubble up through the orchestration chain with full context preservation.
+- **Recovery Strategies:** The Orchestrator implements retry logic for transient failures and graceful degradation for permanent ones.
+
+### Observability
+
+- **Structured Logging:** All agents emit structured logs with consistent fields (timestamp, agent_id, task_id, severity).
+- **Progress Tracking:** Long-running operations emit progress updates that can be consumed by the CLI.
+- **Performance Metrics:** Key operations are instrumented to track execution time and resource usage.
+
+### Security
+
+- **Least Privilege:** Each agent operates with the minimum permissions required for its task.
+- **Input Validation:** All external inputs (commands, file contents) are validated against schemas before processing.
+- **Secure Defaults:** Security-conscious defaults are baked into templates and configurations.
+
+### Quality Assurance
+
+- **Built-in Validation:** Every workflow includes mandatory validation steps that cannot be bypassed.
+- **Progressive Enhancement:** The system starts with basic validations and allows for additional checks to be configured.
+- **Fail-Safe Defaults:** When in doubt, the system defaults to the safer, more restrictive option.
+
+---
+
+## 12. Architecture Decision Records (ADRs)
+
+### ADR-001: File System as Single Source of Truth
+
+**Context:** We need a reliable state management approach that works within Claude Code's constraints.
+
+**Decision:** Use the file system as the exclusive state store, with all system state derived from workspace files.
+
+**Consequences:**
+
+- ✅ Simplifies architecture by eliminating external dependencies
+- ✅ Enables Git-based versioning and rollback
+- ✅ Aligns with Claude Code's native capabilities
+- ⚠️ Requires careful design for concurrent operations through sequential execution patterns
+- ❌ Limits query capabilities compared to a database
+
+### ADR-002: Agent Orchestration over Monolithic Implementation
+
+**Context:** Complex workflows like the `/task` command require multiple specialized operations.
+
+**Decision:** Implement complex workflows through orchestration of single-purpose agents rather than monolithic implementations.
+
+**Consequences:**
+
+- ✅ Enables clean separation of concerns
+- ✅ Allows for independent testing and evolution of each agent
+- ✅ Prevents context pollution between different aspects of the workflow
+- ⚠️ Increases system complexity through inter-agent communication
+- ⚠️ Requires robust error handling across agent boundaries
+
+### ADR-003: Template-Driven Specification Generation
+
+**Context:** Consistency in specification documents is critical for agent parsing and human readability.
+
+**Decision:** All specification documents must be generated from templates stored in `/specs/templates/`.
+
+**Consequences:**
+
+- ✅ Ensures consistent structure across all specifications
+- ✅ Simplifies agent parsing logic
+- ✅ Enables systematic updates to document formats
+- ⚠️ Requires template maintenance as the system evolves
+- ❌ May feel restrictive to users wanting custom formats
+
+---
+
+## 13. Deployment and Setup
+
+**What it is:** Deployment strategy and setup process for the SDD system.
+
+### 13.1 System-Level Deployment
+
+**Global SDD System Setup:**
+
+- **Distribution Method:** Clone the SDD repository and run setup script to copy system files
+- **Installation Process:**
+  - Execute setup script to copy `.claude/commands/*.md`, `.claude/agents/*.md`, and hook configurations
+  - Alternative: `curl` command to download and install system files directly from repository
+- **File Placement:** System files copied to appropriate Claude Code directories (commands, agents, hooks)
+- **Version Management:** Single version approach - no dev/prod distinction needed
+
+### 13.2 Project-Level Initialization
+
+**Per-Project Setup:**
+
+- **Greenfield Projects:** `/init_greenfield` command handles complete project setup (directory structure, templates, initial specifications)
+- **Brownfield Projects:** `/init_brownfield` command adapts existing projects to SDD methodology
+- **Workspace Preparation:** Commands create necessary directories, copy templates, and initialize project-specific configurations
+
+### 13.3 Quality Validation
+
+**Task-Specific Validation:**
+
+- **Validation Scope:** Determined by task requirements and existing project standards
+- **Standard Checks:** Unit tests, linting, security scanning as configured in `quality.toml`
+- **Extensible Framework:** Additional quality checks can be added based on project needs
+- **Test Types:** Focus on required tests (unit tests, linters) rather than comprehensive test suites
