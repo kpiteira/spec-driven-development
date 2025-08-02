@@ -100,14 +100,14 @@ Specification documents are not static. They must evolve as the project matures 
   * **Changing:** Modifications to existing requirements are approved during the roadmap review.
   * **Deprecating:** Do not delete old requirements. Move them to an "Archived" section with a note explaining *why* they were deprecated to preserve project history.
 
-### 4. Project Roadmap (`Roadmap.md`)
+### 4. Roadmap Evolution Process (`Roadmap.md`)
 
 * **Evolution Speed:** Rhythmic. It changes at predictable intervals.
 * **Lifecycle:** This is the engine of change for the PRD. It evolves via the **"Review, Refine, Re-commit"** cycle.
 * **Triggers for Change:** The primary trigger is the **completion of a milestone**. Exceptional triggers include critical user feedback or major market shifts.
 * **Process:** The "Human Architect" leads a review after each milestone to analyze feedback, assess the next milestone's priority, and update the `Roadmap.md` accordingly.
 
-### 5. Milestone Plan (`specs/milestones/M1_MVP_Plan.md`)
+### 5. Milestone Plan Lifecycle (`specs/milestones/M1_MVP_Plan.md`)
 
 * **Evolution Speed:** None. It is **immutable** once active.
 * **Lifecycle:** A Milestone Plan is a point-in-time artifact. It is **created** at the start of a milestone, **executed** by the `Supervisor Agent`, and **archived** upon completion.
