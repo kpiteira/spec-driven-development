@@ -131,6 +131,11 @@ The system shall implement the following sub-agents, each with a distinct role:
 - **NFR-SCALE-002 (Template Evolution):** The system must support updates to specification templates without breaking existing projects.
 - **NFR-SCALE-003 (Agent Independence):** Sub-agents must be independently testable and evolvable without system-wide changes.
 
+### 3.7. Model Selection & Performance
+
+- **NFR-PERF-004 (Strategic Conversation Quality):** Strategic planning commands (`/init_greenfield`, `/plan_milestone`) must use Claude Opus model for superior reasoning and strategic guidance.
+- **NFR-PERF-005 (Implementation Efficiency):** Implementation commands (`/task`, `/milestone`) should use Claude Sonnet model for efficient code generation and execution.
+
 ---
 
 ## 4. User Experience (UX) and Interface (UI)
@@ -150,6 +155,13 @@ The system shall implement the following sub-agents, each with a distinct role:
 - **Progress Reporting:** Long-running operations (like `/milestone`) provide incremental progress updates
 - **Status Persistence:** Command results are logged via hooks for later inspection
 - **Graceful Degradation:** Commands fail safely without corrupting the workspace
+
+**Command Frontmatter Requirements (REQ-CMD-001):** All SDD commands must include YAML frontmatter with:
+
+- **`model`:** Strategic commands (`/init_greenfield`, `/plan_milestone`) use `opus`; implementation commands (`/task`, `/milestone`) use `sonnet`
+- **`description`:** Clear, concise command purpose for discoverability
+- **`argument-hint`:** Expected parameters for auto-completion (e.g., `[milestone-name]` for `/plan_milestone`)
+- **`allowed-tools`:** Minimal required tools for security and performance (typically file operations and template access)
 
 ### 4.2. File-Based Interface
 

@@ -145,31 +145,49 @@ graph TB
 
 ### 4.3 Command Definition Structure
 
-**Standard Command File Format:**
+**Standard SDD Command Frontmatter:**
+
+All SDD commands must follow this frontmatter pattern:
 
 ```markdown
 ---
-name: "task"
+model: opus  # Strategic planning commands (init_greenfield, plan_milestone)
+# OR
+model: sonnet  # Implementation commands (task, milestone)
+description: "Clear, concise command purpose"
+argument-hint: "[expected parameters]"
+allowed-tools: ["Write", "Read", "LS"]  # Minimal required tools
+---
+```
+
+**Strategic Planning Command Example:**
+
+```markdown
+---
+model: opus
+description: "Initialize new SDD project through guided specification creation"
+argument-hint: "[project-type]"
+allowed-tools: ["Write", "Read", "LS"]
+---
+
+# Greenfield Project Initialization
+
+Act as a product and technical specification expert. Guide the user through creating comprehensive project documentation following the SDD methodology...
+```
+
+**Implementation Command Example:**
+
+```markdown
+---
+model: sonnet
 description: "Execute a single development task following SDD methodology"
-tools: ["create_file", "replace_string_in_file", "run_in_terminal", "semantic_search"]
-model: "claude-3-5-sonnet-20241022"
+argument-hint: "[task-id]"
+allowed-tools: ["Write", "Read", "LS", "Bash"]
 ---
 
 # Task Execution Command
 
-Execute a development task following the SDD Assembly Line Pattern.
-
-## Usage
-`/task TASK-ID`
-
-## Parameters
-- `TASK-ID`: The identifier of the task to execute (must exist in `/specs/tasks/`)
-
-## Workflow
-1. Validate Task Blueprint exists
-2. Invoke Orchestrator Agent with task parameters
-3. Monitor agent workflow progress
-4. Report final status to user
+Execute a development task following the SDD Assembly Line Pattern...
 ```
 
 **Key Principles:**
