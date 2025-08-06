@@ -31,6 +31,8 @@
 
 * `REQ-001`: `/init_greenfield` - Interactive specification creation workflow (Vision → Requirements → Architecture → Roadmap)
 * `REQ-003`: `/plan_milestone` - Interactive milestone planning workflow with vertical slice breakdown
+* `REQ-CMD-001`: Command frontmatter requirements (model, description, argument-hint, allowed-tools)
+* `NFR-PERF-004`: Strategic conversation quality using Claude Opus model
 * Global template storage system (not project-specific)
 * AI-assisted document creation using templates as guidance
 * Specification hierarchy validation and consistency checking
@@ -69,7 +71,6 @@
   * **And** all documents follow SDD methodology and template structure
 * **Task Sequence:**
     1. **TASK-001:** Create `.claude/commands/init_greenfield.md` with comprehensive conversation prompt
-    2. **TASK-002:** Test and refine greenfield conversation quality with realistic project scenarios
 
 ---
 
@@ -84,8 +85,7 @@
   * **And** task sequences are developed for each vertical slice
   * **And** a complete, actionable `Milestone_Plan.md` is created following SDD template
 * **Task Sequence:**
-    1. **TASK-003:** Create `.claude/commands/plan_milestone.md` with comprehensive conversation prompt
-    2. **TASK-004:** Test and refine milestone planning conversation quality with real roadmap scenarios
+    1. **TASK-002:** Create `.claude/commands/plan_milestone.md` with comprehensive conversation prompt
 
 ---
 
@@ -100,8 +100,8 @@
   * **And** installation can be done via both git clone and curl approaches
   * **And** clear documentation guides setup and first usage
 * **Task Sequence:**
-    1. **TASK-005:** Create installation script that copies templates to `~/.sdd/templates/` and commands to `.claude/commands/`
-    2. **TASK-006:** Create curl-based installation option and comprehensive setup documentation
+    1. **TASK-003:** Create installation script that copies templates to `~/.sdd/templates/` and commands to `.claude/commands/`
+    2. **TASK-004:** Create curl-based installation option and comprehensive setup documentation
 
 ---
 
@@ -116,26 +116,18 @@
 * Cross-document consistency validation ensures specifications maintain logical hierarchy
 * Conversation quality assessment ensures workflows guide architects effectively
 
-**Per-Slice Checks (Integration & E2E Tests):**
+**Per-Slice Checks (Manual Verification):**
 
-* **Slice 1:** Greenfield command tests verify complete specification creation workflow (Vision → Requirements → Architecture → Roadmap) produces high-quality, consistent documents
-* **Slice 2:** Milestone planning tests verify roadmap transformation into actionable milestone plans with proper vertical slice breakdowns
-* **Slice 3:** Installation tests verify complete system setup, template accessibility, and Claude Code command recognition
+* **Slice 1:** Verify `/init_greenfield` command is recognized by Claude Code and successfully guides creation of complete specification sets
+* **Slice 2:** Verify `/plan_milestone` command transforms roadmaps into actionable milestone plans with proper vertical slice breakdowns
+* **Slice 3:** Verify installation process correctly sets up templates and commands, making SDD system immediately usable
 
 **Final Milestone Acceptance Tests:**
 
-* **Complete SDD Workflow:** Installation → Greenfield initialization → Milestone planning with real project scenario
+* **Complete SDD Workflow:** Installation → Greenfield initialization → Milestone planning end-to-end manual test
 * **Claude Code Integration:** Verify all SDD commands appear in `/help` and execute correctly
-* **Specification Quality:** Validate generated documents enable effective project execution in Milestone 2
-* **Conversation Quality:** Ensure interactive workflows provide strategic guidance and produce consistent results
-* **User Experience:** Test that new architects can successfully use the system without prior SDD knowledge
-
-**Test Data & Scenarios:**
-
-* Multiple realistic project scenarios (web app, API, CLI tool) for testing conversation workflows
-* Edge cases for incomplete user responses and guidance recovery
-* Integration scenarios that validate cross-document consistency
-* Real-world usage scenarios that serve as both validation and documentation
+* **Self-Validation Test:** Use `/plan_milestone` to successfully plan M2, M3, M4, and M5 for the SDD project itself
+* **User Experience:** Confirm new users can install and use the system successfully following documentation
 
 ---
 
@@ -143,7 +135,7 @@
 
 **Milestone 1 is complete when:**
 
-* All 6 tasks are implemented and tested successfully
+* All 4 tasks are implemented successfully
 * `/init_greenfield` creates complete, high-quality specification sets through interactive conversations
 * `/plan_milestone` transforms roadmaps into actionable milestone plans with proper vertical slice breakdowns
 * Global template system provides guidance without polluting project repositories
