@@ -1,8 +1,8 @@
 # Greenfield Project Initialization Workflow
 
-This document outlines the collaborative process between a Human Architect and the AI Orchestrator for initiating a new "greenfield" project from scratch. The workflow is designed to be a flexible, Socratic dialogue that transforms a high-level idea into a robust set of initial specifications.
+This document outlines the validated hybrid process between a Human Architect, the Main AI Agent, and specialized Sub-Agents for initiating a new "greenfield" project from scratch. The workflow combines conversational guidance (Main Agent) with research-intensive specification generation (Sub-Agents) to transform a high-level idea into a robust set of initial specifications.
 
-The core principle is to move from an informal "brain dump" to formal, structured documents through a guided, interactive process, ensuring clarity and alignment before any development work begins.
+The core principle is to move from an informal "brain dump" to formal, structured documents through a guided, interactive process that leverages both conversational context-building and clean-context research-driven generation, ensuring clarity and alignment before any development work begins.
 
 ## The Four Phases of Initialization
 
@@ -26,23 +26,29 @@ This is the most critical phase. Instead of immediately generating documents, th
     -   *"Are there any specific technologies we must use or avoid? Why?"*
 -   **Human Architect's Role**: To engage with the questions, think critically about the project, and provide clearer, more detailed answers. This dialogue enriches the shared understanding of the project.
 
-### Phase 3: Synthesis & First Draft
+### Phase 3: Hybrid Document Generation
 
-Once the Socratic dialogue has yielded sufficient clarity, the AI Orchestrator synthesizes the entire conversation—the initial briefing plus the clarifications—into a set of formal specification documents.
+Once the Socratic dialogue has yielded sufficient clarity, the workflow uses a validated hybrid approach combining Main Agent conversation with specialized Sub-Agent research and generation.
 
--   **AI Orchestrator's Role**: To generate the first drafts of the initial project documents, typically:
-    1.  `0_Project_Vision.md`
-    2.  `1_Product_Requirements.md`
-    The AI will explicitly map statements from the conversation to the sections of these documents, providing traceability.
--   **Human Architect's Role**: To wait for the AI to produce the initial drafts.
+-   **Main AI Agent's Role**: 
+    1.  **Vision Generation**: Generate `0_Project_Vision.md` directly through continued conversation with the Human Architect, using the accumulated context and SDD vision methodology. No sub-agent needed as this is conversational work that provides essential context for subsequent sub-agents.
+    
+-   **Sub-Agent Coordination**: After vision completion, coordinate specialized sub-agents with clean contexts:
+    2.  **Requirements Sub-Agent**: Invoked with clean context containing approved vision, SDD requirements methodology, templates, and web research capabilities to generate `1_Product_Requirements.md` plus numbered strategic questions for specification gaps.
+    3.  **Architecture Sub-Agent**: Invoked with clean context containing vision, requirements, SDD architecture methodology, templates, and web research capabilities to generate `2_Architecture.md` plus numbered strategic questions.
+    4.  **Roadmap Sub-Agent**: Invoked with clean context containing all prior specifications, SDD roadmap methodology, templates, and web research capabilities to generate `3_Roadmap.md` plus numbered strategic questions.
+    
+    Each sub-agent performs extensive research and receives only the specifications needed for their work, preventing context pollution while ensuring research-driven, high-quality outputs.
+    
+-   **Human Architect's Role**: To engage with the Main Agent for vision creation, then review sub-agent outputs and answer their strategic questions.
 
-### Phase 4: Guided Review & Refinement
+### Phase 4: Guided Review & Sub-Agent Refinement
 
-The final phase is a collaborative review of the drafted documents. The AI guides the Human Architect through each document, section by section, to ensure it accurately reflects the agreed-upon vision and requirements.
+The final phase is a collaborative review of the sub-agent generated documents. The AI Orchestrator facilitates review while leveraging sub-agents for refinements when needed.
 
--   **AI Orchestrator's Role**: To present the documents and facilitate the review. It might ask, *"Does this 'Key Features' list accurately capture the core functionality we discussed?"* or *"Is the 'Success Metrics' section aligned with your definition of success?"*
--   **Human Architect's Role**: To review, request changes, and provide final approval on the documents. This is an iterative loop of feedback and refinement until the documents are deemed a solid foundation for the next steps (Architecture and Roadmap).
+-   **AI Orchestrator's Role**: To present the sub-agent generated documents and facilitate the review. For each document, it presents both the content and the sub-agent's self-review findings. When refinements are needed, it re-invokes the appropriate specialist sub-agent with updated context and specific feedback to generate improved versions. The orchestrator asks strategic questions like *"Does this 'Key Features' list accurately capture the core functionality we discussed?"* or *"Is the 'Success Metrics' section aligned with your definition of success?"*
+-   **Human Architect's Role**: To review, request changes, and provide final approval on the documents. This is an iterative loop of feedback and refinement, with the AI Orchestrator coordinating specialized sub-agents for any needed revisions until the documents are deemed a solid foundation for development.
 
 ## Outcome
 
-The successful completion of this workflow results in a set of approved, foundational specification documents (`0_Project_Vision.md` and `1_Product_Requirements.md`) that are deeply aligned with the Human Architect's intent. This robust starting point minimizes ambiguity and provides a clear mandate for the subsequent phases of the Spec-Driven Development process.
+The successful completion of this workflow results in a complete set of approved, foundational specification documents (`0_Project_Vision.md`, `1_Product_Requirements.md`, `2_Architecture.md`, and `3_Roadmap.md`) that are deeply aligned with the Human Architect's intent. These documents are generated by specialized sub-agents working with clean, focused contexts, ensuring high quality and consistency while preventing context pollution. This robust starting point minimizes ambiguity and provides a comprehensive mandate for the subsequent implementation phases of the Spec-Driven Development process.

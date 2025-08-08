@@ -1,1 +1,4 @@
 .DS_Store
+
+# Task bundles - temporary working directories
+.task_bundles/

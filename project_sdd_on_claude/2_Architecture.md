@@ -117,85 +117,145 @@ graph TB
 
 ---
 
-## 4. Slash Command Architecture
+## 4. Sub-Agent Architecture
 
-**What it is:** The primary user interface and workflow orchestration system for all SDD operations.
+**What it is:** The specialized agent system that enables context isolation and prevents context pollution through focused, single-purpose agents with clean contexts.
 
-### 4.1 Command Hierarchy
+### 4.1 Sub-Agent Design Principles
+
+**Core Architecture Goals:**
+
+- **Context Isolation**: Each sub-agent receives only the context needed for its specific task, preventing context pollution
+- **Specialized Expertise**: Sub-agents are designed with deep, focused knowledge in their domain
+- **Clean Handoffs**: Sub-agents generate structured outputs that main agents can directly use
+- **Quality Consistency**: Sub-agents maintain consistent quality standards across all generated content
+
+### 4.2 Hybrid Main Agent + Sub-Agent Approach
+
+**Validated Architecture Pattern:**
+
+| Document Type | Handler | Rationale | Context Provided | Output Format |
+| ------------- | ------- | --------- | ---------------- | ------------- |
+| **Project Vision** | **Main Agent** | Conversational, no research needed, provides context for sub-agents | User conversation + SDD methodology | Complete Vision.md through guided conversation |
+| **Product Requirements** | **Requirements Sub-Agent** | Research-heavy, needs clean context, builds on vision | Vision.md + SDD methodology + templates + web research | Complete Requirements.md + numbered strategic questions |
+| **Architecture** | **Architecture Sub-Agent** | Research-heavy, needs clean context, builds on requirements | Vision.md + Requirements.md + SDD methodology + templates + web research | Complete Architecture.md + numbered strategic questions |
+| **Roadmap** | **Roadmap Sub-Agent** | Research-heavy, needs clean context, builds on all specs | All prior specs + SDD methodology + templates + web research | Complete Roadmap.md + numbered strategic questions |
+
+**Key Principles:**
+- **Main Agent**: Handles conversational, context-building work (Vision)
+- **Sub-Agents**: Handle research-intensive, specification generation work (Requirements, Architecture, Roadmap)
+- **Clean Contexts**: Sub-agents start fresh with only relevant specifications and methodology
+- **Research-Driven**: Sub-agents perform extensive web research for informed decisions
+- **Question-Based**: Sub-agents generate numbered strategic questions only for specification gaps
+
+### 4.3 Sub-Agent Context Management
+
+**Context Isolation Strategy:**
+
+1. **Clean Context Initialization**: Each sub-agent starts with a fresh context containing only:
+   - Relevant SDD methodology documentation for their specialty
+   - Specific templates for their document type
+   - Previous specification documents needed for their work
+   - No conversation history or unrelated context
+
+2. **Structured Input Preparation**: Main agent prepares structured input containing:
+   - User requirements and clarifications
+   - Specific questions answered by user
+   - Dependencies from other specification documents
+   - Quality requirements and constraints
+
+3. **Focused Output Generation**: Sub-agents produce:
+   - Complete specification documents following templates
+   - Strategic questions for user clarification
+   - Self-review findings and improvement recommendations
+   - Cross-references to other specification documents
+
+### 4.4 Slash Command Architecture
+
+**What it is:** The primary user interface and workflow orchestration system that coordinates sub-agents for SDD operations.
+
+#### 4.4.1 Command Hierarchy
 
 **Core SDD Commands:**
 
-| Command                  | Purpose                                          | Workflow Orchestrated                    |
+| Command                  | Purpose                                          | Hybrid Orchestration Pattern             |
 | ------------------------ | ------------------------------------------------ | ---------------------------------------- |
-| `/init_greenfield`       | Initialize new SDD project from scratch         | Project setup → Template generation → Initial specs |
-| `/init_brownfield`       | Adopt SDD for existing project                  | Project analysis → Spec generation → Integration |
-| `/milestone MILESTONE-ID`| Execute a complete milestone                     | Task generation → Sequential task execution |
-| `/task TASK-ID`          | Execute a single development task               | Research → Security → Implementation → Validation |
-| `/spec_update TYPE`      | Update specification documents                   | Template validation → Content generation |
+| `/init_greenfield`       | Initialize new SDD project from scratch         | Main Agent (Vision) → Requirements Sub-Agent → Architecture Sub-Agent → Roadmap Sub-Agent |
+| `/init_brownfield`       | Adopt SDD for existing project                  | Main Agent (Vision) → Requirements Sub-Agent → Architecture Sub-Agent → Roadmap Sub-Agent |
+| `/milestone MILESTONE-ID`| Execute a complete milestone                     | Task Specialist for each task in sequence |
+| `/task TASK-ID`          | Execute a single development task               | Task Specialist with isolated context |
+| `/spec_update TYPE`      | Update specification documents                   | Relevant Specialist with current context |
 
-### 4.2 Command-to-Agent Orchestration
+#### 4.4.2 Command-to-Sub-Agent Orchestration
 
-**How Slash Commands Work:**
+**How Sub-Agent Commands Work:**
 
-1. **User Invocation**: Human architect types slash command (e.g., `/task TASK-001`)
-2. **Command Processing**: Claude Code routes to appropriate command definition (`.claude/commands/task.md`)
-3. **Workflow Orchestration**: Command invokes Orchestrator Agent with specific parameters
-4. **Agent Delegation**: Orchestrator sequentially invokes specialist sub-agents (Bundler → Security → Coder → Validator)
-5. **Result Delivery**: Orchestrator returns success/failure status to command, which reports to user
+1. **User Invocation**: Human architect types slash command (e.g., `/init_greenfield project-name`)
+2. **Command Processing**: Claude Code routes to appropriate command definition (`.claude/commands/init_greenfield.md`)
+3. **Context Preparation**: Main agent gathers user requirements through guided conversation
+4. **Sub-Agent Invocation**: Main agent invokes specialized sub-agents with clean, focused contexts:
+   - **Vision Specialist**: Receives user vision + SDD vision methodology
+   - **Requirements Specialist**: Receives approved vision + SDD requirements methodology  
+   - **Architecture Specialist**: Receives vision + requirements + SDD architecture methodology
+   - **Roadmap Specialist**: Receives all prior specs + SDD roadmap methodology
+5. **Quality Integration**: Main agent integrates sub-agent outputs and facilitates user review
+6. **Result Delivery**: Main agent coordinates final document approval and delivery
 
-### 4.3 Command Definition Structure
+#### 4.4.3 Sub-Agent Command Definition Structure
 
-**Standard SDD Command Frontmatter:**
+**Standard SDD Command Frontmatter for Sub-Agent Commands:**
 
-All SDD commands must follow this frontmatter pattern:
+All SDD commands using sub-agents must follow this frontmatter pattern:
 
 ```markdown
 ---
-model: opus  # Strategic planning commands (init_greenfield, plan_milestone)
-# OR
-model: sonnet  # Implementation commands (task, milestone)
 description: "Clear, concise command purpose"
 argument-hint: "[expected parameters]"
-allowed-tools: ["Write", "Read", "LS"]  # Minimal required tools
+allowed-tools: ["Write", "Read", "LS", "Task"]  # Task tool required for sub-agents
 ---
 ```
 
-**Strategic Planning Command Example:**
+**Sub-Agent Command Example:**
 
 ```markdown
 ---
-model: opus
-description: "Initialize new SDD project through guided specification creation"
-argument-hint: "[project-type]"
-allowed-tools: ["Write", "Read", "LS"]
+description: "Initialize new SDD project through guided specification creation using specialized sub-agents"
+argument-hint: "[project-name] (optional)"
+allowed-tools: ["Write", "Read", "LS", "Task"]
 ---
 
-# Greenfield Project Initialization
+# Greenfield Project Initialization with Sub-Agents
 
-Act as a product and technical specification expert. Guide the user through creating comprehensive project documentation following the SDD methodology...
+Act as a product and technical specification orchestrator. Guide the user through creating comprehensive project documentation by coordinating specialized sub-agents following the SDD methodology.
+
+## Phase 1: User Requirements Gathering
+[Collect user requirements through conversation]
+
+## Phase 2: Sub-Agent Orchestration
+For each specification document, invoke the appropriate specialist sub-agent:
+
+### Vision Document Generation
+Use Task tool to invoke "vision-specialist" sub-agent with:
+- User requirements and vision
+- SDD Vision methodology
+- Vision document template
+
+### Requirements Document Generation  
+Use Task tool to invoke "requirements-specialist" sub-agent with:
+- Approved vision document
+- User clarifications
+- SDD Requirements methodology
+- Requirements document template
+
+[Continue pattern for Architecture and Roadmap specialists]
 ```
 
-**Implementation Command Example:**
+**Key Sub-Agent Principles:**
 
-```markdown
----
-model: sonnet
-description: "Execute a single development task following SDD methodology"
-argument-hint: "[task-id]"
-allowed-tools: ["Write", "Read", "LS", "Bash"]
----
-
-# Task Execution Command
-
-Execute a development task following the SDD Assembly Line Pattern...
-```
-
-**Key Principles:**
-
-- **Single Entry Point**: Each command is the sole entry point for its workflow
-- **Agent Orchestration**: Commands don't implement logic - they orchestrate agents
-- **Parameter Validation**: Commands validate inputs before delegating to agents
-- **Status Reporting**: Commands provide user feedback and error handling
+- **Context Isolation**: Commands use Task tool to invoke sub-agents with clean contexts
+- **Specialized Expertise**: Each sub-agent has deep domain knowledge without context pollution
+- **Structured Handoffs**: Sub-agents receive structured input and produce complete outputs
+- **Quality Orchestration**: Main agent coordinates review and refinement with user
 
 ---
 

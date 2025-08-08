@@ -26,12 +26,13 @@
 
 ## 2. Milestone Overview
 
-**What it is:** A high-level, ordered list of the major milestones for the project. Each milestone should represent a significant and coherent package of value.
+**What it is:** A high-level, ordered list of the major milestones for the project. Each milestone should represent a significant and coherent package of value delivered through vertical slices.
 
 **Best Practices:**
 
 * Give each milestone a clear, descriptive name and a primary goal.
 * The sequence should tell a logical story of the product's evolution.
+* **Vertical Slice Approach:** Each milestone should be broken down into vertical slices that deliver end-to-end functionality across all layers of the system (UI, business logic, data). This ensures each slice provides tangible user value and can be independently tested and deployed.
 
 **Example:**
 

@@ -21,13 +21,16 @@ This document outlines the complete functional requirements for the Spec-Driven 
 
 The Claude Code CLI shall be configured with the following custom commands:
 
-- **`/init_greenfield`** (REQ-001): Creates the `specs/` directory and populates it with the standard templates.
+- **`/init_greenfield`** (REQ-001): Creates complete project specifications using hybrid Main Agent + Sub-Agent approach.
   - **Acceptance Criteria:**
     - **Given** I am in a new project directory
     - **When** I execute `/init_greenfield`
     - **Then** a `specs/` directory is created with all template files
+    - **And** the Main Agent guides me through Vision creation via conversation
+    - **And** specialized sub-agents generate Requirements, Architecture, and Roadmap documents
+    - **And** each sub-agent performs research and asks only numbered strategic questions for specification gaps
+    - **And** I receive complete, template-compliant specification documents
     - **And** the system reports successful initialization
-    - **And** I can proceed to create project specifications
 
 - **`/init_brownfield`** (REQ-002): Initiates the codebase discovery workflow to generate "as-is" specifications for an existing project.
   - **Acceptance Criteria:**
@@ -80,7 +83,39 @@ The system shall implement the following sub-agents, each with a distinct role:
   - Performs static analysis (linting, type checking).
   - Reports a clear `pass` or `fail` verdict.
 
-### 2.3. Hooks & Notifications
+### 2.3. Specialized Sub-Agents (Validated Hybrid Model)
+
+- **`Requirements Sub-Agent`** (REQ-009): Research-driven requirements generation with clean context isolation.
+  - **Acceptance Criteria:**
+    - **Given** an approved Vision document and SDD methodology
+    - **When** invoked by Main Agent via Task tool
+    - **Then** reads Vision document and SDD requirements templates
+    - **And** performs web research for domain-specific requirements patterns
+    - **And** generates numbered strategic questions (1., 2., 3., etc.) only for specification gaps
+    - **And** creates complete Requirements.md document with proper FR-001, NFR-001 numbering
+    - **And** avoids asking about information already in Vision document
+
+- **`Architecture Sub-Agent`** (REQ-010): Research-driven architecture specification with technology evaluation.
+  - **Acceptance Criteria:**
+    - **Given** approved Vision and Requirements documents and SDD methodology  
+    - **When** invoked by Main Agent via Task tool
+    - **Then** reads all prior specifications and SDD architecture templates
+    - **And** performs web research for technology options and patterns
+    - **And** generates numbered strategic questions only for gaps not covered in existing specifications
+    - **And** creates complete Architecture.md document with research-based recommendations
+    - **And** never asks about technology choices already documented in specifications
+
+- **`Roadmap Sub-Agent`** (REQ-011): Research-driven roadmap planning with vertical slice methodology.
+  - **Acceptance Criteria:**
+    - **Given** all approved specification documents and SDD methodology
+    - **When** invoked by Main Agent via Task tool  
+    - **Then** reads all specifications and SDD roadmap templates
+    - **And** performs web research for similar project patterns and complexity estimates
+    - **And** generates numbered strategic questions only for planning gaps not covered in specifications
+    - **And** creates complete Roadmap.md document with vertical slice milestone breakdowns
+    - **And** avoids timeline questions unless specifically requested by user
+
+### 2.4. Hooks & Notifications
 
 - **Notification System** (REQ-009): The system shall use hooks to send notifications to the Human Architect for key events, including:
   - Task completion (pass or fail).

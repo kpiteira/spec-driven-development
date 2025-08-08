@@ -1,6 +1,6 @@
 # Brownfield Project Onboarding Workflow
 
-This document outlines the process for integrating an existing "brownfield" project into the Spec-Driven Development (SDD) methodology. The primary goal is to analyze the current state of the codebase, synthesize a set of "as-is" specifications, and then collaborate with the Human Architect to define the future direction.
+This document outlines the validated hybrid process for integrating an existing "brownfield" project into the Spec-Driven Development (SDD) methodology. The workflow combines Main Agent codebase analysis and conversational guidance with specialized Sub-Agent research-driven specification generation. The primary goal is to analyze the current state of the codebase, synthesize a set of "as-is" specifications, and then collaborate with the Human Architect to define the future direction using the same hybrid approach proven successful for greenfield projects.
 
 ## The Four Phases of Onboarding
 
@@ -50,13 +50,22 @@ This is the key collaborative phase. Using the "As-Is" Report as context, the AI
 
 -   **Human Architect's Role**: To answer the AI's questions, providing the essential context that isn't present in the code itself.
 
-### Phase 4: Collaborative Specification Drafting
+### Phase 4: Hybrid Specification Generation
 
-Armed with both the code analysis and the human's strategic input, the AI and Human Architect collaborate to draft the necessary specification documents.
+Armed with both the code analysis and the human's strategic input, the workflow uses the validated hybrid approach combining Main Agent conversation with specialized Sub-Agent research and generation.
 
--   **AI Orchestrator's Role**: To generate the first drafts of the relevant specification documents (e.g., a new `Milestone_Plan.md` for an upcoming feature, or a full `Architecture.md` if one doesn't exist).
--   **Human Architect's Role**: To review, refine, and approve the drafted specifications, ensuring they align the existing codebase with the new business goals.
+-   **Main AI Agent's Role**: 
+    1.  **Vision Generation**: Generate `0_Project_Vision.md` directly through continued conversation with the Human Architect, using the accumulated context from codebase analysis and strategic discussions. The existing codebase provides concrete context for vision refinement.
+    
+-   **Sub-Agent Coordination**: After vision completion, coordinate specialized sub-agents with clean contexts:
+    2.  **Requirements Sub-Agent**: Invoked with clean context containing approved vision, existing codebase analysis, SDD requirements methodology, templates, and web research capabilities to generate `1_Product_Requirements.md` plus numbered strategic questions for specification gaps.
+    3.  **Architecture Sub-Agent**: Invoked with clean context containing vision, requirements, existing codebase architecture patterns, SDD architecture methodology, templates, and web research capabilities to generate updated `2_Architecture.md` plus numbered strategic questions.
+    4.  **Roadmap Sub-Agent**: Invoked with clean context containing all prior specifications, existing codebase state, SDD roadmap methodology, templates, and web research capabilities to generate `3_Roadmap.md` plus numbered strategic questions.
+    
+    Each sub-agent leverages the existing codebase analysis while performing additional research, ensuring research-driven specifications that build on current system understanding.
+    
+-   **Human Architect's Role**: To engage with the Main Agent for vision creation, then review sub-agent outputs and answer their strategic questions, ensuring specifications align the existing codebase with new business goals.
 
 ## Outcome
 
-The result of this workflow is a shared, deep understanding of the project, captured in a set of clear, actionable specification documents. This process transforms an existing codebase from a static artifact into a living project aligned with the SDD methodology, ready for structured, predictable development.
+The result of this workflow is a shared, deep understanding of the project, captured in a set of clear, actionable specification documents generated through the validated hybrid approach. The Main Agent's conversational guidance ensures context preservation from codebase analysis, while specialized Sub-Agents provide research-driven, high-quality specifications with clean contexts. This process transforms an existing codebase from a static artifact into a living project aligned with the SDD methodology, ready for structured, predictable development with comprehensive specifications that bridge current system understanding and future strategic direction.
