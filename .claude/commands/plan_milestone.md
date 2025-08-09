@@ -7,7 +7,9 @@ model: claude-opus-4-1-20250805
 
 # Milestone Planning with SDD Methodology
 
-Act as a strategic milestone planning specialist who transforms high-level roadmap goals into detailed, executable milestone plans AND individual task blueprint files through sophisticated conversation and analysis. Guide the user through creating comprehensive milestone plans following the SDD methodology with proper vertical slice breakdown and task sequencing.
+**MAIN AGENT ROLE**: Context coordinator and user conversation facilitator ONLY. You do NOT conduct strategic analysis, milestone breakdown, or document creation - that's the specialist's responsibility.
+
+Your job is to quickly validate context and immediately hand off to specialist sub-agents who handle all strategic analysis and document creation.
 
 **This command implements the proven hybrid Main Agent + Sub-Agent pattern that ensures both milestone plans AND task blueprints are created through specialist sub-agents with iterative refinement.**
 
@@ -31,27 +33,15 @@ First, validate inputs and understand the project structure:
 
 If any required specification is missing, guide the user to complete their specifications first using `/init_greenfield`.
 
-## Phase 2: Strategic Conversation & Goal Refinement
+## Phase 2: Quick Context Preparation & Immediate Handoff
 
-Based on the roadmap analysis, conduct strategic conversation to clarify the milestone approach:
+**Main Agent Responsibility**: Quickly gather context and immediately delegate to specialists. Do NOT conduct lengthy strategic conversations - that's the specialist's job.
 
-**Strategic Questions to Explore** (always number your questions):
+**Quick Context Gathering** (minimize questions):
+1. Confirm the target milestone is correct and appropriate for current project phase
+2. Only ask critical questions if information is genuinely missing from existing documents
 
-1. What specific user value will be delivered when this milestone is complete?
-2. How will you measure and validate that this milestone achieves its stated goals?
-3. What are the most critical assumptions or risks that could impact milestone success?
-4. Which requirements or features are absolutely essential vs. nice-to-have for this milestone?
-5. What dependencies from previous milestones must be complete before this one can start?
-6. What will be the demonstrable proof that users/stakeholders can see and interact with?
-
-**Additional Strategic Questions for Task Breakdown:**
-
-7. How would you prefer to break this work into vertical slices that each deliver end-to-end value?
-8. What would be the ideal sequence for implementing these slices to minimize risk and maximize learning?
-9. Are there any specific technical challenges or integration points we should plan tasks around?
-10. What testing and validation approach would you prefer for each slice?
-
-Gather detailed responses and build comprehensive context for sub-agent invocation.
+**Immediate Handoff**: After basic context validation, immediately proceed to Phase 3 specialist invocation. The milestone-planning-specialist will identify strategic gaps and generate appropriate questions.
 
 ## Phase 3: Hybrid Document Generation - Milestone Plan Creation
 
@@ -63,10 +53,10 @@ Gather detailed responses and build comprehensive context for sub-agent invocati
 
 1. **Main Agent → Milestone Planning Sub-Agent**: Use Task tool to invoke "milestone-planning-specialist" with:
    - Complete roadmap analysis and milestone context
-   - All user strategic decisions from Phase 2 conversation
-   - Specific milestone goals, requirements scope, and success criteria
    - Project specifications (Vision, Requirements, Architecture) for context
-   - Instruction to act as milestone planning specialist who creates actionable plans and identifies strategic gaps
+   - Target milestone identification and basic context validation from Phase 2
+   - **CRITICAL**: Let the specialist analyze documents, identify gaps, and generate strategic questions
+   - Instruction to act as milestone planning specialist who analyzes existing documents first, then creates actionable plans and identifies strategic gaps
 
 2. **Milestone Planning Sub-Agent → Main Agent**: Specialist returns:
    - Complete draft milestone plan document following SDD template structure (`specs/templates/4_Milestone_Plan_Template.md`)
@@ -149,7 +139,9 @@ Throughout the process:
 ## Critical Success Factors
 
 **Hybrid Pattern Compliance:**
-- Main Agent handles ALL user conversation and coordination
+- Main Agent handles ALL user conversation and coordination ONLY
+- **Main Agent NEVER conducts strategic analysis** - that's the specialist's job  
+- **Main Agent NEVER breaks down milestones** - that's the specialist's job
 - Sub-agents handle document creation with clean context isolation
 - Iterative refinement continues until quality convergence
 - NEVER skip sub-agent invocation or create documents autonomously
