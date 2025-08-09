@@ -44,19 +44,28 @@ declare -i AGENTS_INSTALLED=0
 # Logging functions
 log_info() { 
     echo -e "${GREEN}[INFO]${NC} $*"
-    [[ -f "$INSTALL_LOG" ]] && echo "[INFO] $*" >> "$INSTALL_LOG"
+    # Only write to log if directory exists and is writable
+    if [[ -d "$(dirname "$INSTALL_LOG")" ]]; then
+        echo "[INFO] $*" >> "$INSTALL_LOG" 2>/dev/null || true
+    fi
 }
 log_warn() { 
     echo -e "${YELLOW}[WARN]${NC} $*"
-    [[ -f "$INSTALL_LOG" ]] && echo "[WARN] $*" >> "$INSTALL_LOG"
+    if [[ -d "$(dirname "$INSTALL_LOG")" ]]; then
+        echo "[WARN] $*" >> "$INSTALL_LOG" 2>/dev/null || true
+    fi
 }
 log_error() { 
     echo -e "${RED}[ERROR]${NC} $*" >&2
-    [[ -f "$INSTALL_LOG" ]] && echo "[ERROR] $*" >> "$INSTALL_LOG"
+    if [[ -d "$(dirname "$INSTALL_LOG")" ]]; then
+        echo "[ERROR] $*" >> "$INSTALL_LOG" 2>/dev/null || true
+    fi
 }
 log_debug() { 
     echo -e "${BLUE}[DEBUG]${NC} $*"
-    [[ -f "$INSTALL_LOG" ]] && echo "[DEBUG] $*" >> "$INSTALL_LOG"
+    if [[ -d "$(dirname "$INSTALL_LOG")" ]]; then
+        echo "[DEBUG] $*" >> "$INSTALL_LOG" 2>/dev/null || true
+    fi
 }
 
 # Security: User consent for remote installation
@@ -75,7 +84,9 @@ show_security_warning() {
     echo "Installation log: $INSTALL_LOG"
     echo
     
-    if [[ -t 0 ]]; then  # Interactive terminal
+    # Force non-interactive mode for curl|bash - safer default
+    if [[ -t 0 ]] && [[ -t 1 ]] && [[ "${SDD_INTERACTIVE:-auto}" != "false" ]]; then
+        echo "Interactive mode detected. Set SDD_INTERACTIVE=false to skip this prompt."
         read -p "Continue with installation? (y/N): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -83,7 +94,8 @@ show_security_warning() {
             exit 0
         fi
     else
-        log_info "Non-interactive installation proceeding..."
+        log_info "Non-interactive installation mode - proceeding automatically..."
+        log_info "To enable interactive mode, run: SDD_INTERACTIVE=true curl ... | bash"
     fi
 }
 
