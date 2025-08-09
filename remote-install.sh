@@ -115,10 +115,14 @@ check_prerequisites() {
         exit 1
     fi
     
-    # Check bash version
-    if [[ ${BASH_VERSION:0:1} -lt 4 ]]; then
-        log_error "Bash 4.0+ required, found $BASH_VERSION"
+    # Check bash version (3.2+ should work, but warn about older versions)
+    local bash_major="${BASH_VERSION:0:1}"
+    local bash_minor="${BASH_VERSION:2:1}"
+    if [[ $bash_major -lt 3 ]] || [[ $bash_major -eq 3 && $bash_minor -lt 2 ]]; then
+        log_error "Bash 3.2+ required, found $BASH_VERSION"
         exit 1
+    elif [[ $bash_major -eq 3 ]]; then
+        log_warn "Using older bash version $BASH_VERSION - consider upgrading to bash 4.0+ for better compatibility"
     fi
     
     # Check network connectivity
