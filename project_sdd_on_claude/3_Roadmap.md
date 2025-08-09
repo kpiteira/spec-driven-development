@@ -65,3 +65,38 @@ This document outlines the strategic, milestone-based plan for developing the SD
   - `Bundler` (Full version): Extend the Bundler to analyze third-party libraries and external documentation.
 - **User Stories Fulfilled:**
   - "As a Human Architect, I want to onboard an existing project..."
+
+## Milestone 6: Intelligent Defaults & Pattern Learning (Future)
+
+**Goal:** To evolve the SDD system from comprehensive questioning to intelligent pattern recognition and preference validation, reducing cognitive load through learned defaults.
+
+### Vision for this Milestone
+
+- **User Preference Storage:** Store cross-project patterns in `~/.sdd/preferences/` (user-level patterns)
+- **Pattern Recognition:** Analyze past project choices to suggest intelligent defaults
+- **Preference Validation:** Transform "What do you want?" into "Continue using X like last time?"
+- **Cross-Project Intelligence:** Learn technology stack patterns, quality approaches, UX patterns
+
+### Example User Experience Evolution
+
+**Before (Current):**
+```
+SDD: "What package manager do you want for Python?"
+SDD: "What testing framework should we use?"
+SDD: "How should we handle error messages?"
+```
+
+**After (Pattern Learning):**
+```
+SDD: "I see you've used UV in 3 recent Python projects. Continue with UV? [Y/n]"
+SDD: "Use pytest + coverage like your last 2 projects? [Y/n]"  
+SDD: "Apply your standard CLI error message patterns? [Y/n]"
+```
+
+### Future Considerations
+
+- **Team-Level Patterns:** How to handle shared team preferences vs individual patterns
+- **Pattern Evolution:** How preferences change over time and technology trends
+- **Pattern Sharing:** Potential for community pattern sharing and best practice propagation
+
+*Note: This milestone represents the evolution from "specification creation" to "specification validation" through learned intelligence.*

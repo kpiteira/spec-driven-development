@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+template_type: "Product Requirements"
+description: "Template for defining functional and non-functional requirements"
+---
+
 # Product Requirements: [Project Name]
 
 **Purpose of this document:** This document translates the project vision into tangible features, constraints, and requirements. It defines *what* the system must do from a user's perspective. It is the primary input for the architecture, design, and development teams. A well-crafted PRD is a living document that serves as a single source of truth for the product's intended functionality.

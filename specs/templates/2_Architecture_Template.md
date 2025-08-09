@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+template_type: "Architecture"
+description: "Template for technical architecture and design decisions"
+---
+
 # Architectural Specification: [Project Name]
 
 **Purpose of this document:** This document outlines the technical architecture for [Project Name]. It serves as the engineering team's blueprint, defining the high-level structure, technology stack, design patterns, and infrastructure. Its goal is to ensure the system is built in a way that is scalable, maintainable, and aligned with the product requirements.
@@ -85,7 +91,46 @@
 
 ---
 
-## 5. Data Management
+## 5. Repository Organization and File Structure
+
+**What it is:** Standards for organizing files, directories, and project structure to ensure consistency and good user experience.
+
+**Best Practices:**
+
+* Follow industry conventions for file placement
+* Prioritize user expectations - put files where users expect to find them
+* Keep the root directory clean and organized
+* Group related files together logically
+
+**Example Repository Organization:**
+
+| File Type | Location | Rationale |
+|-----------|----------|-----------|
+| **Primary User Scripts** | Root directory | First thing users see; matches industry standards |
+| **Installation Scripts** | `/install.sh`, `/setup.sh` | Primary user entry point for system setup |
+| **Test Files** | `/tests/` or `/test/` | Clear separation of test code from production |
+| **Development Tools** | `/scripts/`, `/tools/`, `/bin/` | Internal tooling separated from user interface |
+| **Documentation** | Root + organized subdirs | README.md in root, detailed docs in subdirectories |
+| **Configuration** | Project root or `/.config/` | Easily discoverable configuration files |
+| **Build Artifacts** | `/dist/`, `/build/`, `/out/` | Standard build output directories |
+
+**File Naming Conventions:**
+
+* Use clear, descriptive names that indicate purpose
+* Follow consistent patterns within each directory
+* Consider alphabetical sorting for better discoverability
+* Use standard extensions and prefixes where appropriate
+
+**User Experience Principles:**
+
+* **Intuitive Discovery**: Users should find files where they expect them
+* **Clean Root Directory**: Minimize clutter in repository root  
+* **Logical Grouping**: Related files grouped together
+* **Standard Conventions**: Follow widely-adopted industry patterns
+
+---
+
+## 6. Data Management
 
 **What it is:** A description of how data is stored, managed, and accessed.
 
@@ -102,7 +147,7 @@
 
 ---
 
-## 6. Cross-Cutting Concerns
+## 7. Cross-Cutting Concerns
 
 **What it is:** A plan for handling concerns that affect all parts of the system.
 
@@ -114,7 +159,28 @@
 
 ---
 
-## 7. Architecture Decision Records (ADRs) (Optional, but highly recommended)
+## 8. User & Developer Experience Patterns
+
+**What it is:** Document your approaches to user interface design and developer workflow - information that can be learned and suggested for future projects.
+
+**Simple Documentation:**
+
+* **User Experience Approach:** How do users interact with your system? (CLI patterns, error messages, help systems)
+* **Developer Experience Approach:** How do developers contribute? (setup process, testing approach, code review patterns)  
+* **Quality Approach:** What quality standards and tools do you use? (linting, testing frameworks, validation)
+* **Maintenance Approach:** How do you handle updates and evolution? (versioning strategy, backward compatibility)
+
+**Example:**
+* User Experience: CLI with `--help` for all commands, structured error messages with suggestions
+* Developer Experience: Standard GitHub flow, PR templates, automated testing
+* Quality: ESLint + Prettier, 80% test coverage requirement, automated security scanning
+* Maintenance: Semantic versioning, deprecation warnings before breaking changes
+
+*Note: This information helps the SDD system learn patterns for suggesting defaults in future projects.*
+
+---
+
+## 9. Architecture Decision Records (ADRs) (Optional, but highly recommended)
 
 **What it is:** A collection of short documents, each describing a single, significant architectural decision. This creates a historical record of *why* the architecture is the way it is.
 

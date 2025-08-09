@@ -931,6 +931,49 @@ sys.exit(0)
 - ⚠️ Requires template maintenance as the system evolves
 - ❌ May feel restrictive to users wanting custom formats
 
+### ADR-004: Repository Organization and File Placement Standards
+
+**Context:** Without clear patterns for file organization, teams make inconsistent decisions about where to place different types of files, leading to poor user experience and maintenance challenges.
+
+**Decision:** Establish standardized repository organization patterns that prioritize user expectations and logical file grouping.
+
+**Repository Organization Standards:**
+
+| File Type | Location | Rationale |
+|-----------|----------|-----------|
+| **Primary User Scripts** | Root directory | First thing users see; matches industry standards |
+| **Installation Scripts** | `/install.sh` | Primary user entry point for system setup |
+| **Test Files** | `/tests/` | Clear separation of test code from production |
+| **Development Tools** | `/scripts/dev/` or `/tools/` | Internal tooling separated from user interface |
+| **Documentation** | Root + organized subdirs | README.md in root, detailed docs in subdirectories |
+| **Specification Templates** | `/specs/templates/` | Clear separation of templates from instances |
+| **System Configuration** | `/.claude/`, `/.sdd/` | Hidden directories for system-specific files |
+
+**File Naming Conventions:**
+
+- **Installation scripts**: `install.sh`, `setup.sh` (root level)
+- **Test files**: `test_*.sh`, `*_test.sh` (in `/tests/`)
+- **Development tools**: Descriptive names in `/scripts/` or `/tools/`
+- **Configuration**: System-specific hidden directories
+
+**User Experience Principles:**
+
+- **Intuitive Discovery**: Users should find files where they expect them
+- **Clean Root Directory**: Minimize clutter in repository root
+- **Logical Grouping**: Related files grouped together
+- **Standard Conventions**: Follow widely-adopted industry patterns
+
+**Consequences:**
+
+- ✅ Improves user experience through predictable file locations
+- ✅ Reduces cognitive load when navigating repositories
+- ✅ Enables consistent tooling and automation
+- ✅ Facilitates onboarding for new team members
+- ✅ Prevents architectural debt from poor organization
+- ⚠️ Requires discipline to maintain organization standards
+- ⚠️ May require refactoring existing repositories
+- ❌ Can feel restrictive for small experimental projects
+
 ---
 
 ## 13. Deployment and Setup

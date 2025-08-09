@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+template_type: "Milestone Plan"
+description: "Template for detailed milestone execution planning"
+---
+
 # Milestone Plan: [Milestone Name, e.g., M1 - Minimum Viable Product]
 
 **Purpose of this document:** This document provides a detailed, tactical plan for executing a single milestone from the Project Roadmap. It is the primary input for the `Supervisor Agent`, containing the precise sequence of work and the quality gates required to consider the milestone complete.

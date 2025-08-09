@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+template_type: "Project Vision"
+description: "Template for defining project mission, goals, and strategic vision"
+---
+
 # Project Vision: [Project Name]
 
 **Purpose of this document:** The Project Vision serves as the "North Star" for the entire project. It is the single source of truth for the project's purpose and strategic goals. It ensures that all stakeholders, from developers to executives, are aligned on *why* this project exists and what it aims to achieve.

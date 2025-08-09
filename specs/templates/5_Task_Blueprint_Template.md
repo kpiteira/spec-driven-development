@@ -1,4 +1,7 @@
 ---
+version: "1.0.0"
+template_type: "Task Blueprint"
+description: "Template for atomic task definition with testable contracts"
 id: TASK-XXX
 title: "[A clear, descriptive title for the task]"
 milestone_id: "M1-MVP"

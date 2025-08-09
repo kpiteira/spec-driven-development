@@ -1,3 +1,9 @@
+---
+version: "1.0.0"
+template_type: "Roadmap"
+description: "Template for strategic development roadmap and milestone planning"
+---
+
 # Project Roadmap: [Project Name]
 
 **Purpose of this document:** The Project Roadmap provides a strategic, high-level view of the project's development sequence, organized by value-driven milestones. It is not a timeline. Instead, it communicates the ordered path of development, ensuring all stakeholders and team members understand what is being built now, what's next, and what is planned for the future.
