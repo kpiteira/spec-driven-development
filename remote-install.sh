@@ -165,7 +165,7 @@ cleanup() {
 secure_download() {
     local url="$1"
     local output_file="$2"
-    local expected_hash="$3"  # Optional checksum
+    local expected_hash="${3:-}"  # Optional checksum
     
     log_debug "Downloading: $(basename "$url")"
     
