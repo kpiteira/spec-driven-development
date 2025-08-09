@@ -2,3 +2,6 @@
 
 # Task bundles - temporary working directories
 .task_bundles/
+
+# Generated test reports - transient artifacts
+reports/
