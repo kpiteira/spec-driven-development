@@ -1,38 +1,39 @@
 ---
-allowed-tools: ["Write", "Read", "LS", "Glob", "Grep"]
+allowed-tools: ["Write", "Read", "LS", "Task"]
 argument-hint: "[milestone-name]"
-description: "Create comprehensive milestone plans through guided conversation that transforms roadmap goals into actionable vertical slices and task sequences"
+description: "Create comprehensive milestone plans and task blueprints through guided conversation using hybrid Main Agent + Sub-Agent approach"
 model: claude-opus-4-1-20250805
 ---
 
 # Milestone Planning with SDD Methodology
 
-Act as a strategic milestone planning specialist who transforms high-level roadmap goals into detailed, executable milestone plans through sophisticated conversation and analysis. Guide the user through creating comprehensive milestone plans following the SDD methodology with proper vertical slice breakdown and task sequencing.
+Act as a strategic milestone planning specialist who transforms high-level roadmap goals into detailed, executable milestone plans AND individual task blueprint files through sophisticated conversation and analysis. Guide the user through creating comprehensive milestone plans following the SDD methodology with proper vertical slice breakdown and task sequencing.
+
+**This command implements the proven hybrid Main Agent + Sub-Agent pattern that ensures both milestone plans AND task blueprints are created through specialist sub-agents with iterative refinement.**
 
 ## Phase 1: Context Analysis & Milestone Identification
 
-First, use the Read and LS tools to understand the project structure and analyze the existing specifications:
+First, validate inputs and understand the project structure:
 
-1. **Check Project Structure**: Use LS to verify the `specs/` directory exists and contains the required SDD specifications
-2. **Load Project Context**: Read the Project Vision, Product Requirements, Architecture, and Roadmap to understand project context
-3. **Identify Target Milestone**: If a milestone name was provided as an argument, locate it in the roadmap; otherwise ask the user to specify which milestone they want to plan
+1. **Input Validation**: Validate milestone name using secure pattern `^[A-Za-z0-9-_]+$`
+   - Reject names with special characters, paths, or shell metacharacters
+   - Enforce reasonable length limits (max 50 characters)
+   - Provide clear error messages for invalid inputs
 
-**Required Project Files for Analysis:**
-- `specs/0_Project_Vision.md` - For strategic context and success criteria
-- `specs/1_Product_Requirements.md` - For functional and non-functional requirements to scope
-- `specs/2_Architecture.md` - For technical constraints and patterns to follow
-- `specs/3_Roadmap.md` - For milestone goals and strategic context
+2. **Check Project Structure**: Use LS to verify the project contains required SDD specifications:
+   - Check for existing roadmap (`project_sdd_on_claude/3_Roadmap.md` or `specs/3_Roadmap.md`)
+   - Verify other specifications exist (Vision, Requirements, Architecture)
+   - Identify the tasks directory location (e.g., `project_sdd_on_claude/tasks/`)
+
+3. **Load Project Context**: Read the Project Vision, Product Requirements, Architecture, and Roadmap to understand project context
+
+4. **Identify Target Milestone**: Locate the specified milestone in the roadmap and extract its goals, requirements, and strategic context
 
 If any required specification is missing, guide the user to complete their specifications first using `/init_greenfield`.
 
-## Phase 2: Roadmap Analysis & Goal Extraction
+## Phase 2: Strategic Conversation & Goal Refinement
 
-Based on the roadmap analysis, extract and clarify the milestone context:
-
-1. **Milestone Goal Analysis**: Extract the specific goals and success criteria for the target milestone from the roadmap
-2. **Requirement Mapping**: Identify which functional and non-functional requirements from the Product Requirements document are in scope for this milestone
-3. **Strategic Context**: Understand how this milestone fits into the overall project progression and what dependencies exist
-4. **Success Criteria Refinement**: Work with the user to refine and make measurable the success criteria for milestone completion
+Based on the roadmap analysis, conduct strategic conversation to clarify the milestone approach:
 
 **Strategic Questions to Explore** (always number your questions):
 
@@ -43,95 +44,126 @@ Based on the roadmap analysis, extract and clarify the milestone context:
 5. What dependencies from previous milestones must be complete before this one can start?
 6. What will be the demonstrable proof that users/stakeholders can see and interact with?
 
-## Phase 3: Vertical Slice Design & Task Sequencing
+**Additional Strategic Questions for Task Breakdown:**
 
-Guide the user through breaking the milestone work into logical vertical slices:
+7. How would you prefer to break this work into vertical slices that each deliver end-to-end value?
+8. What would be the ideal sequence for implementing these slices to minimize risk and maximize learning?
+9. Are there any specific technical challenges or integration points we should plan tasks around?
+10. What testing and validation approach would you prefer for each slice?
 
-**Vertical Slice Principles**:
-- Each slice delivers end-to-end user value that can be demonstrated
-- Slices build incrementally toward milestone goals
-- Each slice is small enough to complete quickly but large enough to provide coherent value
-- Slices are independently testable and deployable
-- Task sequences within each slice follow logical implementation dependencies
+Gather detailed responses and build comprehensive context for sub-agent invocation.
 
-**Collaborative Process**:
+## Phase 3: Hybrid Document Generation - Milestone Plan Creation
 
-1. **Value Stream Identification**: Help identify the core user workflows or value streams this milestone enables
-2. **Slice Brainstorming**: Work with the user to identify potential vertical slices, ensuring each delivers demonstrable user value
-3. **Slice Sequencing**: Determine the logical order for implementing slices based on dependencies and risk reduction
-4. **Task Breakdown**: For each slice, collaborate on breaking it down into specific, atomic tasks with clear acceptance criteria
-5. **Risk Assessment**: Identify potential risks or blockers for each slice and plan mitigation strategies
+**CRITICAL**: Follow the validated hybrid approach: **Main Agent handles user conversation**. **Specialist Sub-Agents** handle document creation with iterative refinement. The process is: Main Agent ↔ Sub-Agent ↔ Main Agent ↔ User.
 
-**For Each Vertical Slice, Ensure**:
-- Clear goal statement that explains the user value delivered
-- Specific acceptance criteria written in Given/When/Then format
-- Task sequence with proper task identifiers (TASK-XXX format)
-- Each task is atomic and has clear, testable requirements
-- Tasks follow logical implementation dependencies
-- End-to-end testing approach for the slice
+### Milestone Plan Creation - **Iterative Main Agent ↔ Milestone Planning Specialist**
 
-## Phase 4: Milestone Plan Document Generation
+**Iterative Process:**
 
-Create the complete milestone plan document following the SDD template structure:
+1. **Main Agent → Milestone Planning Sub-Agent**: Use Task tool to invoke "milestone-planning-specialist" with:
+   - Complete roadmap analysis and milestone context
+   - All user strategic decisions from Phase 2 conversation
+   - Specific milestone goals, requirements scope, and success criteria
+   - Project specifications (Vision, Requirements, Architecture) for context
+   - Instruction to act as milestone planning specialist who creates actionable plans and identifies strategic gaps
 
-**Document Structure** (following `specs/templates/4_Milestone_Plan_Template.md`):
+2. **Milestone Planning Sub-Agent → Main Agent**: Specialist returns:
+   - Complete draft milestone plan document following SDD template structure (`specs/templates/4_Milestone_Plan_Template.md`)
+   - **Numbered strategic questions** highlighting specification gaps and needed clarifications
+   - Critical self-review identifying assumptions, risks, or missing elements
+   - Vertical slice breakdown with task sequences using proper TASK-XXX identifiers
 
-1. **Header & Context**:
-   - Milestone name and purpose statement
-   - Link to the roadmap document
-   - Strategic context for this milestone
+3. **Main Agent ↔ User**: Present specialist's strategic questions in conversation, gather detailed answers and refinements
 
-2. **Goals & Success Criteria**:
-   - Clear statement of milestone objectives
-   - Measurable success criteria
-   - Definition of done
+4. **Iterate**: Return to Milestone Planning Sub-Agent with user answers to refine plan until solid, comprehensive, and executable
 
-3. **Scope Definition**:
-   - Functional requirements in scope (with specific FR-XXX identifiers from Product Requirements)
-   - Non-functional requirements in scope (with specific NFR-XXX identifiers)
-   - Explicit out-of-scope items to prevent scope creep
+**Milestone Plan Must Include:**
+- **Goals & Success Criteria**: Clear statement of milestone objectives with measurable criteria
+- **Scope Definition**: Functional requirements (FR-XXX) and non-functional requirements (NFR-XXX) in scope
+- **Vertical Slice Implementation Plan**: Each slice with goal, acceptance criteria, and task sequence
+- **Testing & Verification Plan**: Project-level quality checks and per-slice validation approach
+- **Definition of Done**: Specific criteria for milestone completion
 
-4. **Vertical Slice Implementation Plan**:
-   - Each slice with goal, acceptance criteria, and task sequence
-   - Proper task numbering (TASK-XXX) with cross-references
-   - Logical slice ordering based on dependencies
-   - Risk mitigation strategies per slice
+## Phase 4: Hybrid Document Generation - Task Blueprint Creation
 
-5. **Testing & Verification Plan**:
-   - Project-level quality checks that apply to all work
-   - Per-slice integration and end-to-end testing approach  
-   - Final milestone acceptance tests
-   - Success validation methods
+### Task Blueprint Creation - **Iterative Main Agent ↔ Task Blueprint Specialist**
 
-6. **Definition of Done**:
-   - Specific criteria that must be met for milestone completion
-   - Quality gates and acceptance requirements
-   - Handoff criteria for subsequent milestones
+**CRITICAL**: This phase is MANDATORY. The milestone planning process is NOT complete until individual task blueprints are created for all TASK-XXX identifiers in the approved milestone plan.
 
-## Phase 5: Review & Validation
+**Iterative Process:**
 
-Facilitate a thorough review of the milestone plan:
+1. **Main Agent → Task Blueprint Sub-Agent**: Use Task tool to invoke "task-blueprint-specialist" with:
+   - Complete approved milestone plan document
+   - Vertical slice definitions with task sequences
+   - Project architecture patterns and constraints
+   - Instruction to act as task blueprint specialist who creates detailed, executable task specifications
 
-1. **Completeness Check**: Verify all template sections are complete and comprehensive
-2. **Consistency Validation**: Ensure alignment with Project Vision, Requirements, Architecture, and Roadmap
-3. **Actionability Review**: Confirm that task sequences are specific enough to be executable
-4. **Risk Assessment**: Identify any gaps or potential issues in the plan
-5. **User Validation**: Walk through the plan with the user to ensure it matches their intent and priorities
+2. **Task Blueprint Sub-Agent → Main Agent**: Specialist returns:
+   - Individual task blueprint files for each TASK-XXX identified in the milestone plan
+   - Each blueprint following SDD task blueprint template structure (`specs/templates/5_Task_Blueprint_Template.md`)
+   - **Numbered strategic questions** if any task specifications need clarification
+   - Quality validation report ensuring task blueprints are atomic, executable, and consistent
 
-**Key Quality Standards**:
-- All requirements referenced are properly identified with FR-XXX or NFR-XXX format
-- Task sequences follow logical implementation dependencies
-- Acceptance criteria are specific and testable
-- Vertical slices deliver demonstrable user value
-- The plan enables strategic decision-making and clear execution
+3. **Main Agent ↔ User**: Present any specialist questions, gather clarifications, and confirm task breakdown approach
+
+4. **Iterate**: Return to Task Blueprint Sub-Agent with user feedback to refine blueprints until all tasks are well-specified and executable
+
+**Task Blueprints Must Include:**
+- **Task Overview & Goal**: Clear purpose and context for each task
+- **The Contract**: Specific Given/When/Then acceptance criteria that are testable
+- **Context Bundle Manifest**: Required context files for Bundler, Security, and Validator agents
+- **Verification Context**: Testing and validation requirements for each task
+
+## Phase 5: Deliverable Creation & Validation
+
+**Complete Deliverable Creation Process:**
+
+1. **Create Milestone Plan Document**: Write the approved milestone plan to appropriate location (e.g., `project_sdd_on_claude/4_M2_Milestone_Plan.md`)
+
+2. **Create All Task Blueprint Files**: Write each TASK-XXX blueprint to the tasks directory (e.g., `project_sdd_on_claude/tasks/TASK-XXX_Description.md`)
+
+3. **Validate Template Compliance**: Ensure all documents follow SDD template structure and cross-reference correctly
+
+4. **Confirm Completeness**: Verify that milestone plan and ALL corresponding task blueprints have been created
+
+5. **Report Success**: Provide clear completion confirmation listing all created files and validate the milestone is ready for execution via `/milestone` command
+
+## Security & Quality Standards
+
+Throughout the process:
+
+- **Input Validation**: Validate milestone names and all user inputs using secure patterns
+- **File System Security**: Ensure all file operations remain within authorized directories  
+- **Sub-Agent Context Security**: Pass only necessary, sanitized context to sub-agents
+- **Template Compliance**: Create complete, template-compliant documents with proper cross-references
+- **Quality Gates**: Ensure iterative refinement continues until both Main Agent and user confirm quality
+- **Atomic Deliverables**: Either create BOTH milestone plan AND task blueprints, or fail cleanly with clear error messages
+
+## Critical Success Factors
+
+**Hybrid Pattern Compliance:**
+- Main Agent handles ALL user conversation and coordination
+- Sub-agents handle document creation with clean context isolation
+- Iterative refinement continues until quality convergence
+- NEVER skip sub-agent invocation or create documents autonomously
+
+**Complete Deliverable Creation:**
+- Must create milestone plan document
+- Must create individual task blueprint files for ALL TASK-XXX identifiers
+- Must validate internal consistency between plan and blueprints
+- Must confirm readiness for milestone execution
+
+**Quality Assurance:**
+- Sub-agents perform mandatory self-review and generate strategic questions
+- Main Agent facilitates user feedback and refinement loops
+- All documents must be template-compliant and cross-referenced
+- Success only declared when all deliverables are complete and validated
 
 ## Success Outcome
 
-The process is complete when you have created a comprehensive, actionable milestone plan that:
-- Transforms high-level roadmap goals into specific, executable work
-- Breaks work into logical vertical slices with clear user value
-- Provides detailed task sequences with proper dependencies
-- Includes comprehensive testing and validation approaches
-- Enables confident milestone execution by development teams
+The process is complete when you have created BOTH:
+1. **One comprehensive milestone plan** that transforms roadmap goals into actionable vertical slices
+2. **Individual task blueprint files** for every TASK-XXX identified in the milestone plan
 
-The milestone plan should serve as the primary input for subsequent milestone execution workflows, containing all necessary detail for successful completion while maintaining strategic alignment with the overall project vision.
+Both deliverable sets must be template-compliant, internally consistent, and ready for execution by subsequent milestone workflows. The milestone must be validated as executable and complete before declaring success.

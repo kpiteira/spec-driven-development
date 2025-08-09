@@ -170,6 +170,81 @@ graph TB
    - Self-review findings and improvement recommendations
    - Cross-references to other specification documents
 
+### 4.3.1 Sub-Agent Iterative Quality Process
+
+**What it is:** The proven iterative refinement workflow that ensures sub-agents are accountable for document quality and collaborate with Main Agents to resolve specification gaps.
+
+**Core Process Pattern: `Main Agent ↔ Sub-Agent ↔ Main Agent ↔ User`**
+
+#### Phase 1: Sub-Agent Document Creation
+
+1. **Context Reception**: Sub-agent receives structured context from Main Agent including:
+   - Previous specification documents
+   - User conversation history and decisions
+   - Specific template requirements
+   - Quality standards and constraints
+
+2. **Document Generation**: Sub-agent creates complete, template-compliant document
+3. **Critical Self-Review**: Sub-agent performs comprehensive self-assessment:
+   - **Gap Analysis**: Identifies missing information, unclear requirements, or assumptions
+   - **Quality Validation**: Verifies template compliance, cross-references, and requirement traceability
+   - **Assumption Detection**: Flags any assumptions made that require user validation
+   - **Content Assessment**: Reviews for completeness, actionability, and strategic alignment
+
+#### Phase 2: Strategic Question Generation
+
+1. **Question Formulation**: Sub-agent generates **numbered strategic questions (1., 2., 3., etc.)** for:
+   - Specification gaps that prevent complete document creation
+   - Assumptions that need user validation or clarification
+   - Strategic decisions requiring user input or preferences
+   - Missing context that impacts document quality or accuracy
+
+2. **Deliverable Package**: Sub-agent returns to Main Agent:
+   - **Complete draft document** (even with identified gaps)
+   - **Numbered strategic questions** for user clarification
+   - **Self-review findings** highlighting quality concerns or assumptions
+   - **Refinement recommendations** for improving document quality
+
+#### Phase 3: Main Agent Facilitation
+
+1. **Question Presentation**: Main Agent presents sub-agent's strategic questions to user in conversational format
+2. **Context Gathering**: Main Agent collects detailed user responses, clarifications, and decisions
+3. **Refinement Coordination**: Main Agent determines if additional sub-agent iteration is needed
+
+#### Phase 4: Iterative Refinement
+
+1. **Refinement Loop**: If gaps remain, Main Agent returns to sub-agent with:
+   - User answers to strategic questions
+   - Additional context and clarifications
+   - Refinement requirements and quality expectations
+
+2. **Quality Convergence**: Process continues until:
+    - Sub-agent self-review identifies no critical gaps
+    - User confirms document meets their requirements
+    - Document passes all template compliance and quality checks
+
+#### Critical Success Factors
+
+**Sub-Agent Accountability:**
+
+- Sub-agents are **responsible for document quality** and must identify their own limitations
+- Sub-agents **must not make assumptions** - when uncertain, they generate strategic questions
+- Sub-agents perform **mandatory self-review** and flag quality concerns proactively
+
+**Main Agent Facilitation:**
+
+- Main Agent **never bypasses** sub-agent accountability by making document decisions
+- Main Agent **facilitates user interaction** to resolve sub-agent questions
+- Main Agent **coordinates refinement** but does not override sub-agent expertise
+
+**User Collaboration:**
+
+- User provides **strategic direction** and decisions in response to sub-agent questions
+- User **validates assumptions** and provides missing context for document completion
+- User **approves final documents** before process proceeds to next phase
+
+This iterative process ensures that sub-agents remain accountable for quality while leveraging user expertise for strategic decisions and gap resolution.
+
 ### 4.4 Slash Command Architecture
 
 **What it is:** The primary user interface and workflow orchestration system that coordinates sub-agents for SDD operations.
