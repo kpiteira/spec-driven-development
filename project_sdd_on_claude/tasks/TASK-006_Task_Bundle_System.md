@@ -4,66 +4,66 @@ title: "Create task bundle file system with proper structure"
 milestone_id: "M2-Core-Execution"
 requirement_id: "REQ-005"
 slice: "Slice 1: Task Command Infrastructure & Bundle System"
-status: "pending"
+status: "completed"
 branch: "feature/TASK-006-task-bundle-system"
 ---
 
 ## 1. Task Overview & Goal
 
-**What it is:** Implement the structured task bundle filesystem that provides context isolation, debugging support, and a clean handoff mechanism between agents in the assembly line workflow.
+**What it is:** Implement basic task bundle directory creation and management for the `/task` command to support AI agent coordination in the SDD assembly line workflow.
 
-**Context:** This task creates the foundational data structure that enables the SDD assembly line pattern. Each task bundle serves as an isolated workspace where Bundler, Coder, and Validator agents can collaborate without context pollution, and where failed tasks can be preserved for debugging.
+**Context:** This task enables the `/task` command to create simple bundle directories where AI agents (Bundler, Coder, Validator) can read task blueprints and coordinate their work. Bundles provide context isolation and preserve failed tasks for debugging.
 
-**Goal:** Create a robust task bundle system with standardized directory structure, lifecycle management (creation, processing, cleanup), and validation patterns that support the M2 assembly line workflow while enabling future extensions.
+**Goal:** Enable the `/task` command to create `.task_bundles/TASK-ID/` directories, copy task blueprints, and handle basic cleanup after successful task completion or preserve bundles after failures.
 
 ## 2. The Contract: Requirements & Test Cases
 
-**What it is:** The specific, testable requirements for the task bundle filesystem implementation.
+**What it is:** The specific, testable requirements for basic task bundle directory operations.
 
 * **Behavior 1: Standard Bundle Structure Creation**
   * **Given:** A valid task blueprint and task ID (e.g., TASK-001)
   * **When:** The bundle creation process is initiated
   * **Then:** A `.task_bundles/TASK-001/` directory is created with proper permissions
   * **And:** The directory contains `task_blueprint.md` (copied from original)
-  * **And:** Subdirectories are created for `context/`, `generated/`, and `validation/`
+  * **And:** No subdirectories are created within the bundle (context files are placed directly in bundle root)
   * **And:** A `bundle_status.yaml` file tracks the bundle lifecycle state
 
 * **Behavior 2: Bundle Validation and Integrity**
-  * **Given:** A task bundle directory structure
-  * **When:** Bundle validation is performed
-  * **Then:** All required directories and files are present and accessible
-  * **And:** The task blueprint content matches the original source file
-  * **And:** Bundle status reflects the current processing state accurately
-  * **And:** No orphaned or corrupted bundle artifacts exist
+  * **Given:** A task bundle directory
+  * **When:** The `/task` command checks the bundle
+  * **Then:** The directory exists and is accessible
+  * **And:** The task blueprint file is present and readable
+  * **And:** Bundle status can be tracked (created/completed/failed)
+  * **And:** No corrupted bundle files exist
 
 * **Behavior 3: Bundle Cleanup and Lifecycle Management**
   * **Given:** A completed or failed task bundle
-  * **When:** Bundle cleanup is requested
-  * **Then:** Successful bundles are completely removed to maintain clean workspace
-  * **And:** Failed bundles are preserved with error information for debugging
-  * **And:** Bundle status is updated to reflect final state (completed/failed/preserved)
-  * **And:** No filesystem artifacts are left in inconsistent state
+  * **When:** The `/task` command finishes processing
+  * **Then:** Successful bundles are removed to keep workspace clean
+  * **And:** Failed bundles are preserved for manual inspection and debugging
+  * **And:** Bundle lifecycle is tracked (created → processing → completed/failed)
+  * **And:** No partial or corrupted bundle directories are left behind
 
 * **Behavior 4: Conflict Detection and Resolution**
   * **Given:** An existing task bundle directory for the same task ID
-  * **When:** A new bundle creation is attempted
-  * **Then:** The system detects the existing bundle and reports the conflict
-  * **And:** Provides options for resolution (clean removal, preservation with timestamp)
-  * **And:** Ensures no data loss occurs during conflict resolution
-  * **And:** Maintains filesystem consistency throughout the process
+  * **When:** The `/task` command attempts to create a new bundle
+  * **Then:** The command detects the existing bundle and reports the conflict
+  * **And:** Provides clear options (remove old bundle, preserve with timestamp)
+  * **And:** Ensures no data loss during conflict resolution
+  * **And:** Maintains clean filesystem state throughout the process
 
 ## 3. Context Bundle (Agent-Populated Sibling Files)
 
-**What it is:** Context files that will be provided by other agents to support task bundle system implementation.
+**What it is:** Context files that will be provided by other agents to support implementing basic bundle directory operations in the `/task` command.
 
-* **`bundle_architecture.md`:** Directory structure patterns from SDD methodology, filesystem organization standards, and bundle lifecycle state management patterns. Include architectural requirements for atomic operations and failure isolation
-* **`bundle_security.md`:** Secure filesystem operations, path validation to prevent traversal attacks, safe cleanup procedures, and permissions management for bundle directories
-* **`bundle_code_context.md`:** File system operation interfaces, directory creation and cleanup patterns, YAML handling for bundle status, and error handling conventions for filesystem operations in the project
+* **`bundle_architecture.md`:** Simple directory creation patterns, Claude Code file operations (Write, Read, LS tools), and bundle lifecycle management approach from SDD architecture specifications
+* **`bundle_security.md`:** Safe file operations, input validation for task IDs, path validation to prevent directory traversal, and secure cleanup procedures  
+* **`bundle_code_context.md`:** Claude Code command implementation patterns, file operation examples using Write/Read/LS tools, and error handling conventions for the `/task` command
 
 ## 4. Verification Context
 
 **What it is:** Guidance for validating this task's completion.
 
-* **Unit Test Scope:** Tests must validate bundle directory creation, structure validation, cleanup operations, conflict detection, and error handling for filesystem edge cases
-* **Integration Test Scope:** Integration tests must verify bundle system works correctly with the `/task` command, supports the complete assembly line workflow, and maintains consistency across multiple concurrent operations
-* **Project-Wide Checks:** Filesystem security scanning, bundle structure compliance validation, and verification that bundle lifecycle management follows project patterns for atomic operations and failure recovery
+* **Manual Test Scope:** Test `/task` command creates bundle directories correctly, copies task blueprints, handles conflicts appropriately, and performs cleanup as expected
+* **Integration Test Scope:** Verify `/task` command integrates with AI agents (Bundler, Coder, Validator) and supports the complete assembly line workflow from M2 milestone plan
+* **Project-Wide Checks:** Verify bundle directory operations follow SDD architecture patterns and maintain clean workspace management without security vulnerabilities

@@ -4,7 +4,7 @@ title: "Implement basic `/task` command structure with input validation"
 milestone_id: "M2-Core-Execution"
 requirement_id: "REQ-005"
 slice: "Slice 1: Task Command Infrastructure & Bundle System"
-status: "pending"
+status: "completed"
 branch: "feature/TASK-005-basic-task-command"
 ---
 

@@ -44,10 +44,11 @@ The Main Agent will provide you with structured context including:
 ## Your Task Blueprint Creation Process
 
 ### Phase 1: Task Analysis & Planning
-1. **Parse Milestone Plan**: Extract all TASK-XXX identifiers and their context from vertical slices
-2. **Understand Dependencies**: Identify logical implementation dependencies between tasks
-3. **Map Requirements**: Link tasks to specific functional requirements (FR-XXX) and non-functional requirements (NFR-XXX)
-4. **Plan Atomic Scope**: Ensure each task is atomic - small enough to implement independently but large enough to provide coherent value
+1. **Parse Milestone Plan**: Extract all TASK-XXX identifiers and their **exact descriptions** from vertical slices
+2. **CRITICAL**: Use the **exact task descriptions** from the milestone plan - do NOT create new descriptions or titles
+3. **Understand Dependencies**: Identify logical implementation dependencies between tasks
+4. **Map Requirements**: Link tasks to specific functional requirements (FR-XXX) and non-functional requirements (NFR-XXX)
+5. **Plan Atomic Scope**: Ensure each task is atomic - small enough to implement independently but large enough to provide coherent value
 
 ### Phase 2: Individual Task Blueprint Creation
 For each TASK-XXX in the milestone plan:
@@ -58,11 +59,12 @@ For each TASK-XXX in the milestone plan:
 4. **Verification Context**: Specify testing and validation requirements
 
 ### Phase 3: Quality Validation & Consistency Check
-1. **Atomicity Validation**: Ensure tasks are properly scoped - not too large or too small
-2. **Dependency Consistency**: Verify task sequences follow logical implementation dependencies
-3. **Milestone Alignment**: Confirm tasks collectively achieve milestone goals
-4. **Template Compliance**: Ensure all blueprints follow SDD template structure exactly
-5. **Cross-Reference Validation**: Verify requirement IDs, slice names, and milestone references are correct
+1. **MANDATORY**: Verify each task title and description **exactly matches** what's specified in the milestone plan
+2. **Atomicity Validation**: Ensure tasks are properly scoped - not too large or too small
+3. **Dependency Consistency**: Verify task sequences follow logical implementation dependencies
+4. **Milestone Alignment**: Confirm tasks collectively achieve milestone goals
+5. **Template Compliance**: Ensure all blueprints follow SDD template structure exactly
+6. **Cross-Reference Validation**: Verify requirement IDs, slice names, and milestone references are correct
 
 ### Phase 4: Self-Review & Strategic Questions
 - **Completeness Check**: Are all TASK-XXX identifiers from the milestone plan covered?

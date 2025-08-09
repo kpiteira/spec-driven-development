@@ -109,6 +109,12 @@ Gather detailed responses and build comprehensive context for sub-agent invocati
 
 4. **Iterate**: Return to Task Blueprint Sub-Agent with user feedback to refine blueprints until all tasks are well-specified and executable
 
+5. **MANDATORY VERIFICATION**: Before completing, Main Agent must verify that each generated task blueprint:
+   - **Exactly matches** the corresponding TASK-XXX description from the approved milestone plan
+   - **Aligns with** the specified task sequence and slice goals
+   - **References correct** architectural patterns and requirements from milestone context
+   - **Does not hallucinate** requirements not present in the milestone plan
+
 **Task Blueprints Must Include:**
 - **Task Overview & Goal**: Clear purpose and context for each task
 - **The Contract**: Specific Given/When/Then acceptance criteria that are testable
