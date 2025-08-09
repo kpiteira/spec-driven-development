@@ -351,6 +351,8 @@ graph TD
 
 **Responsibility:** Research and context preparation to prevent hallucination and context loss.
 
+**Model:** `claude-sonnet-4-20250514` (optimized for cost-efficient information processing and research)
+
 **Inputs:**
 
 - Task Bundle directory path
@@ -375,6 +377,8 @@ graph TD
 
 **Responsibility:** Provide proactive security guidance for the specific task.
 
+**Model:** `claude-sonnet-4-20250514` (optimized for systematic security analysis and research)
+
 **Inputs:**
 
 - Task Bundle directory path
@@ -393,6 +397,8 @@ graph TD
 ### 7.4 Coder Agent
 
 **Responsibility:** Implementation and testing following TDD principles.
+
+**Model:** `claude-opus-4-1-20250805` (optimized for creative problem-solving and high-quality code generation with rich context)
 
 **Inputs:**
 
@@ -416,6 +422,8 @@ graph TD
 ### 7.5 Validator Agent
 
 **Responsibility:** Comprehensive quality assurance and verification.
+
+**Model:** `claude-sonnet-4-20250514` (optimized for systematic testing, validation, and quality assurance)
 
 **Inputs:**
 

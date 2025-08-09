@@ -32,7 +32,7 @@
 * `REQ-001`: `/init_greenfield` - Interactive specification creation workflow (Vision → Requirements → Architecture → Roadmap)
 * `REQ-003`: `/plan_milestone` - Interactive milestone planning workflow with vertical slice breakdown
 * `REQ-CMD-001`: Command frontmatter requirements (model, description, argument-hint, allowed-tools)
-* `NFR-PERF-004`: Strategic conversation quality using Claude Opus model
+* `NFR-PERF-004`: Strategic conversation quality using `claude-opus-4-1-20250805` model
 * Global template storage system (not project-specific)
 * AI-assisted document creation using templates as guidance
 * Specification hierarchy validation and consistency checking

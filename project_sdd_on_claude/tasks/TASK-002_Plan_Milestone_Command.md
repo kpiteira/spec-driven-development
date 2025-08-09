@@ -26,7 +26,7 @@ branch: "feature/TASK-002-plan-milestone-command"
   * **Given:** The command file is created as `.claude/commands/plan_milestone.md`
   * **When:** Claude Code scans for available commands
   * **Then:** The command must be discoverable with proper parameter handling
-  * **And:** Frontmatter must include `model: opus`, clear description, `argument-hint: "[milestone-name]"`, and minimal allowed-tools
+  * **And:** Frontmatter must include `model: claude-opus-4-1-20250805`, clear description, `argument-hint: "[milestone-name]"`, and minimal allowed-tools
   * **And:** The command must comply with `REQ-CMD-001` frontmatter requirements
   * **And:** The command must accept a milestone identifier as a parameter
 

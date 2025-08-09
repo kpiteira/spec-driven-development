@@ -26,7 +26,7 @@ branch: "feature/TASK-001-init-greenfield-command"
   * **Given:** The command file is created as `.claude/commands/init_greenfield.md`
   * **When:** Claude Code scans for available commands
   * **Then:** The command must be discoverable and properly formatted
-  * **And:** Frontmatter must include `model: opus`, clear description, argument-hint, and minimal allowed-tools
+  * **And:** Frontmatter must include `model: claude-opus-4-1-20250805`, clear description, argument-hint, and minimal allowed-tools
   * **And:** The command must comply with `REQ-CMD-001` frontmatter requirements
 
 * **Behavior 2: Sequential Specification Creation**
@@ -38,7 +38,7 @@ branch: "feature/TASK-001-init-greenfield-command"
   * **And:** Four separate markdown files must be created in a `specs/` directory
 
 * **Behavior 3: Strategic Conversation Quality**
-  * **Given:** The conversation uses Claude Opus model (`NFR-PERF-004`)
+  * **Given:** The conversation uses `claude-opus-4-1-20250805` model (`NFR-PERF-004`)
   * **When:** The workflow guides specification creation
   * **Then:** Questions must elicit strategic thinking about project purpose and design
   * **And:** The conversation must help architects think through problems, not just collect information

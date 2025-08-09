@@ -168,8 +168,12 @@ The system shall implement the following sub-agents, each with a distinct role:
 
 ### 3.7. Model Selection & Performance
 
-- **NFR-PERF-004 (Strategic Conversation Quality):** Strategic planning commands (`/init_greenfield`, `/plan_milestone`) must use Claude Opus model for superior reasoning and strategic guidance.
-- **NFR-PERF-005 (Implementation Efficiency):** Implementation commands (`/task`, `/milestone`) should use Claude Sonnet model for efficient code generation and execution.
+- **NFR-PERF-004 (Strategic Conversation Quality):** Strategic planning commands (`/init_greenfield`, `/init_brownfield`, `/plan_milestone`) must use `claude-opus-4-1-20250805` model for superior reasoning and strategic guidance.
+- **NFR-PERF-005 (Implementation Efficiency):** Implementation commands (`/task`, `/milestone`) should use `claude-sonnet-4-20250514` model for efficient orchestration and execution.
+- **NFR-PERF-006 (Sub-Agent Specialization):** Sub-agents must use models optimized for their specific responsibilities:
+  - **Research agents** (Bundler, Security Consultant) use `claude-sonnet-4-20250514` for cost-efficient information processing
+  - **Creative agents** (Coder) use `claude-opus-4-1-20250805` for superior code quality with curated context
+  - **Validation agents** (Validator) use `claude-sonnet-4-20250514` for systematic quality assurance
 
 ---
 
@@ -193,7 +197,13 @@ The system shall implement the following sub-agents, each with a distinct role:
 
 **Command Frontmatter Requirements (REQ-CMD-001):** All SDD commands must include YAML frontmatter with:
 
-- **`model`:** Strategic commands (`/init_greenfield`, `/plan_milestone`) use `opus`; implementation commands (`/task`, `/milestone`) use `sonnet`
+- **`model`:** Strategic commands (`/init_greenfield`, `/init_brownfield`, `/plan_milestone`) use `claude-opus-4-1-20250805`; orchestration commands (`/task`, `/milestone`) use `claude-sonnet-4-20250514`
+
+**Sub-Agent Model Requirements (REQ-CMD-002):** All SDD sub-agents must be invoked with models optimized for their role:
+
+- **Research sub-agents:** Bundler, Security Consultant use `claude-sonnet-4-20250514`  
+- **Creative sub-agents:** Coder uses `claude-opus-4-1-20250805`
+- **Validation sub-agents:** Validator uses `claude-sonnet-4-20250514`
 - **`description`:** Clear, concise command purpose for discoverability
 - **`argument-hint`:** Expected parameters for auto-completion (e.g., `[milestone-name]` for `/plan_milestone`)
 - **`allowed-tools`:** Minimal required tools for security and performance (typically file operations and template access)
