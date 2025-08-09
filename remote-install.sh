@@ -42,10 +42,22 @@ declare -i COMMANDS_INSTALLED=0
 declare -i AGENTS_INSTALLED=0
 
 # Logging functions
-log_info() { echo -e "${GREEN}[INFO]${NC} $*" | tee -a "$INSTALL_LOG"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $*" | tee -a "$INSTALL_LOG"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" | tee -a "$INSTALL_LOG" >&2; }
-log_debug() { echo -e "${BLUE}[DEBUG]${NC} $*" | tee -a "$INSTALL_LOG"; }
+log_info() { 
+    echo -e "${GREEN}[INFO]${NC} $*"
+    [[ -f "$INSTALL_LOG" ]] && echo "[INFO] $*" >> "$INSTALL_LOG"
+}
+log_warn() { 
+    echo -e "${YELLOW}[WARN]${NC} $*"
+    [[ -f "$INSTALL_LOG" ]] && echo "[WARN] $*" >> "$INSTALL_LOG"
+}
+log_error() { 
+    echo -e "${RED}[ERROR]${NC} $*" >&2
+    [[ -f "$INSTALL_LOG" ]] && echo "[ERROR] $*" >> "$INSTALL_LOG"
+}
+log_debug() { 
+    echo -e "${BLUE}[DEBUG]${NC} $*"
+    [[ -f "$INSTALL_LOG" ]] && echo "[DEBUG] $*" >> "$INSTALL_LOG"
+}
 
 # Security: User consent for remote installation
 show_security_warning() {
@@ -480,6 +492,13 @@ main() {
 }
 
 # Script entry point - handle both file execution and curl|bash
-if [[ "${BASH_SOURCE[0]:-}" == "${0}" ]] || [[ -z "${BASH_SOURCE[0]:-}" ]]; then
+# Check if script is being executed directly (not sourced)
+if [[ "${BASH_SOURCE:-}" ]]; then
+    # BASH_SOURCE is set - check if it matches $0 (direct execution)
+    if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+        main "$@"
+    fi
+else
+    # BASH_SOURCE is not set - likely curl|bash execution
     main "$@"
 fi
