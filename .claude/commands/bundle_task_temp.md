@@ -30,7 +30,7 @@ Create a task bundle using the SDD bundling workflow extracted from the main `/t
 
 ### Phase 2: Bundler Agent Invocation
 
-1. **Invoke Bundler Agent**: Use Task tool with "bundler-agent" subagent
+1. **Invoke Bundler Agent**: Use Task tool with "bundler-specialist" subagent
    - Provide complete task context and bundle path
    - Request creation of context files: `bundle_architecture.md`, `bundle_security.md`, `bundle_code_context.md`, `bundle_dependencies.md`
    - Update bundle status to "bundling"
@@ -77,4 +77,4 @@ Report all errors clearly with actionable next steps for the user.
 
 Process the task: **{argument}**
 
-Start by validating the task ID, creating the bundle structure, and invoking the bundler-agent specialist.
+Start by validating the task ID, creating the bundle structure, and invoking the bundler-specialist.

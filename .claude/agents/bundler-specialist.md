@@ -1,5 +1,5 @@
 ---
-name: bundler-agent
+name: bundler-specialist
 description: Expert context bundling specialist who analyzes local codebases to create comprehensive task bundles that prevent hallucination in code generation
 tools: mcp__serena__find_symbol, mcp__serena__get_symbols_overview, mcp__serena__find_referencing_symbols, mcp__serena__search_for_pattern, Read, Write, Glob, Grep, Bash
 model: claude-sonnet-4-20250514
