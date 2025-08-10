@@ -119,16 +119,43 @@ Execute the SDD assembly line workflow for a specified task. This command create
    - Set coder_agent_completed: true
    - Report successful code generation to user
 
-### Phase 4: Validator Agent Invocation
+### Phase 4: Validator Agent Invocation (Enhanced Validation)
 
-1. **Invoke Validator Agent**: Use Task tool with "validator-specialist" subagent
-   - Provide bundle path and implementation locations
-   - Request comprehensive validation per task blueprint verification requirements
-   - Update bundle status to "validating"
+1. **Validate Bundle Ready for Validation**
+   - Use Read tool to verify bundle_status.yaml shows status: "ready_for_validation"
+   - Confirm coder_agent_completed: true in bundle status
+   - Validate all required context files exist and are non-empty
+   - Required files: bundle_architecture.md, bundle_security.md, bundle_code_context.md, bundle_dependencies.md, task_blueprint.md
 
-2. **Process Results**: Handle validation outcomes
-   - **Success**: Update status to "completed", clean up bundle directory
-   - **Failure**: Update status to "failed", preserve bundle for debugging
+2. **Update Bundle Status to Validating**
+   - Use Edit tool to update `$bundle_dir/bundle_status.yaml`
+   - Change status from "ready_for_validation" to "validation_started"
+   - Update workflow_phase to "validator_invocation"
+   - Add validation_started_at timestamp (ISO 8601 UTC)
+   - Set validator_agent_completed: false
+
+3. **Invoke Validator Agent with Task Tool**
+   - Use Task tool with subagent_type "validator-specialist"
+   - Specify model: claude-sonnet-4-20250514 (per NFR-PERF-005 for systematic tasks)
+   - Provide comprehensive context in prompt:
+     - Task Bundle directory path: $bundle_dir
+     - Instruction: "Read task blueprint and all bundle_*.md context files"
+     - Request: "Execute comprehensive validation workflow following TASK-013 contract"
+     - Components: "Run tests, linting, type checking, security scanning, and conditional git commit"
+     - Security: "Follow all security guidance from bundle_security.md"
+     - Output: "Generate validation artifacts and preserve bundle on failure"
+   - Handle Task tool execution errors with detailed logging to validator_error.log
+
+4. **Validate Validation Results**
+   - Use Read tool to verify Validator Agent completed validation process
+   - Check validation artifacts: validation_results.json, validation_summary.md
+   - Verify git commit was created if all validation passed (commit SHA in bundle_status.yaml)
+   - Confirm validation failure handling if validation failed (preserved bundle with error details)
+
+5. **Complete Task Based on Validation Results**
+   - **Success**: Update status to "completed", preserve bundle directory for review
+   - **Failure**: Status remains "validation_failed", bundle preserved with detailed error information
+   - **Note**: Bundle is always preserved to allow review of validation process and results
 
 ## Security & Quality Standards
 
@@ -150,11 +177,14 @@ Execute the SDD assembly line workflow for a specified task. This command create
 ## Success Criteria
 
 The command succeeds when:
+
 1. Task bundle is created with correct structure and status tracking
-2. All three agents (Bundler, Coder, Validator) complete successfully
-3. Implementation passes all validation requirements
-4. Bundle is properly cleaned up (success) or preserved (failure)
-5. User receives clear confirmation of completion or actionable error messages
+2. All agents (Bundler, Coder, Validator) complete successfully
+3. Implementation is generated according to task blueprint
+4. All validation checks pass (tests, linting, type checking, security scanning)
+5. Generated code is automatically committed to git repository
+6. Bundle is preserved with complete validation artifacts for review
+7. User receives clear confirmation with commit SHA and validation summary
 
 ## Error Handling
 
@@ -179,6 +209,16 @@ The command succeeds when:
 - **Security validation failures** → Verify security guidance compliance, report specific security violations
 - **Architectural compliance failures** → Check code placement and conventions, report specific architectural violations
 
+**Validator Agent Invocation Failures:**
+
+- **Task tool execution errors** → Log full error details to `$bundle_dir/validator_error.log`
+- **Validator agent timeout** → Update bundle status to "validation_failed", preserve bundle for debugging  
+- **Test execution failures** → Preserve detailed test results, categorize as "test" failure for remediation
+- **Static analysis failures** → Preserve linting/type checking results, categorize as "lint"/"type" for remediation
+- **Security scanning failures** → Preserve security scan results, categorize as "security" failure for remediation
+- **Git commit failures** → Preserve validation results but prevent commit, maintain clean repository state
+- **Validation system errors** → Log system errors, preserve bundle with diagnostic information
+
 **Security Error Handling:**
 - **Path traversal attempts** → Reject immediately with security error message
 - **Bundle directory boundary violations** → Validate all paths remain within `.task_bundles/`
@@ -192,8 +232,13 @@ The command succeeds when:
 - **Actionable guidance** → Provide specific next steps for each failure mode
 
 **Bundle Status Error States:**
+
 - "bundling_failed" → Bundler agent execution failed
-- "coding_failed" → Coder agent execution failed
-- "validation_failed" → Context files missing or invalid
+- "coding_failed" → Coder agent execution failed  
+- "validation_failed" → Validator agent execution failed or validation checks failed
 - "security_failed" → Security validation errors
 - "error_recovery" → General error state for manual inspection
+
+**Bundle Status Success States:**
+
+- "completed" → Task completed successfully with full validation and git commit
