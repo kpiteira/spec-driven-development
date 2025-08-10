@@ -5,7 +5,8 @@
 # 1. Installing specification templates to ~/.sdd/templates/ (version-aware)
 # 2. Installing Claude Code commands to ~/.claude/commands/ (version-aware)
 # 3. Installing Claude Code agents to ~/.claude/agents/ (version-aware)
-# 4. Validating the installation
+# 4. Installing Claude Code hooks to ~/.claude/hooks/ (version-aware)
+# 5. Validating the installation
 # 
 # Version Management:
 # - Only installs files with newer or equal versions
@@ -22,11 +23,13 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SDD_TEMPLATES_DIR="${TEST_HOME:-$HOME}/.sdd/templates"
 readonly CLAUDE_COMMANDS_DIR="${TEST_HOME:-$HOME}/.claude/commands"  
 readonly CLAUDE_AGENTS_DIR="${TEST_HOME:-$HOME}/.claude/agents"
+readonly CLAUDE_HOOKS_DIR="${TEST_HOME:-$HOME}/.claude/hooks"
 
 # Source paths (relative to script location) - following bundle_code_context.md
 readonly TEMPLATES_SOURCE="$SCRIPT_DIR/specs/templates"
 readonly COMMANDS_SOURCE="$SCRIPT_DIR/.claude/commands"
 readonly AGENTS_SOURCE="$SCRIPT_DIR/.claude/agents"
+readonly HOOKS_SOURCE="$SCRIPT_DIR/.claude/hooks"
 
 # Color codes for output - following bundle_code_context.md patterns
 readonly RED='\033[0;31m'
@@ -39,6 +42,7 @@ readonly NC='\033[0m' # No Color
 declare -i TEMPLATES_INSTALLED=0
 declare -i COMMANDS_INSTALLED=0
 declare -i AGENTS_INSTALLED=0
+declare -i HOOKS_INSTALLED=0
 
 # Logging functions - following bundle_code_context.md patterns
 log_info() { echo -e "${GREEN}[INFO]${NC} $*"; }
@@ -55,6 +59,7 @@ validate_path() {
     case "$path" in
         .claude/*) return 0 ;;  # Allow .claude directory operations
         ~/.sdd/*) return 0 ;;   # Allow SDD directory operations
+        ~/.claude/hooks/*) return 0 ;;  # Allow hooks directory operations
         /*) 
             # For absolute paths, do full validation
             local abs_path
@@ -152,7 +157,7 @@ copy_if_newer_version() {
     dest_dir=$(dirname "$destination")
     # Skip path validation for TEST_HOME scenarios and standard installation paths
     case "$dest_dir" in
-        */.sdd/templates|*/.claude/commands|*/.claude/agents) 
+        */.sdd/templates|*/.claude/commands|*/.claude/agents|*/.claude/hooks) 
             # Standard installation paths - allow
             ;;
         *)
@@ -364,6 +369,115 @@ install_agents() {
     return 0
 }
 
+# Optional: Install Claude Code hooks
+install_hooks() {
+    log_info "Installing SDD hooks to $CLAUDE_HOOKS_DIR..."
+    
+    # Hooks are optional - don't fail if directory doesn't exist
+    if [ ! -d "$HOOKS_SOURCE" ]; then
+        log_info "No hooks directory found - skipping hook installation"
+        return 0
+    fi
+    
+    # Create destination directory with appropriate permissions
+    if ! mkdir -p -m 755 "$CLAUDE_HOOKS_DIR"; then
+        log_error "Failed to create hooks directory: $CLAUDE_HOOKS_DIR"
+        return 1
+    fi
+    
+    # Copy hooks with validation - including subdirectories
+    local hook_count=0
+    
+    # Copy Python hook files
+    for hook in "$HOOKS_SOURCE"/*.py; do
+        if [ -f "$hook" ]; then
+            local filename
+            filename=$(basename "$hook")
+            
+            # Set executable permissions for Python scripts
+            if cp -p "$hook" "$CLAUDE_HOOKS_DIR/$filename"; then
+                chmod 755 "$CLAUDE_HOOKS_DIR/$filename"
+                log_info "Installed hook: $filename"
+                ((hook_count++))
+            else
+                log_error "Failed to install hook: $filename"
+                return 1
+            fi
+        fi
+    done
+    
+    # Copy README and other markdown files
+    for doc in "$HOOKS_SOURCE"/*.md; do
+        if [ -f "$doc" ]; then
+            local filename
+            filename=$(basename "$doc")
+            
+            if validate_markdown_file "$doc"; then
+                if copy_if_newer_version "$doc" "$CLAUDE_HOOKS_DIR/$filename"; then
+                    ((hook_count++))
+                else
+                    log_error "Failed to install hook documentation: $filename"
+                    return 1
+                fi
+            else
+                log_warn "Skipping invalid hook documentation: $filename"
+            fi
+        fi
+    done
+    
+    # Copy lib directory if it exists
+    if [ -d "$HOOKS_SOURCE/lib" ]; then
+        if ! mkdir -p -m 755 "$CLAUDE_HOOKS_DIR/lib"; then
+            log_error "Failed to create hooks lib directory"
+            return 1
+        fi
+        
+        for lib_file in "$HOOKS_SOURCE/lib"/*; do
+            if [ -f "$lib_file" ]; then
+                local filename
+                filename=$(basename "$lib_file")
+                
+                if cp -p "$lib_file" "$CLAUDE_HOOKS_DIR/lib/$filename"; then
+                    chmod 644 "$CLAUDE_HOOKS_DIR/lib/$filename"
+                    log_info "Installed lib file: lib/$filename"
+                    ((hook_count++))
+                else
+                    log_error "Failed to install lib file: $filename"
+                    return 1
+                fi
+            fi
+        done
+    fi
+    
+    # Copy sounds directory if it exists
+    if [ -d "$HOOKS_SOURCE/sounds" ]; then
+        if ! mkdir -p -m 755 "$CLAUDE_HOOKS_DIR/sounds"; then
+            log_error "Failed to create hooks sounds directory"
+            return 1
+        fi
+        
+        for sound_file in "$HOOKS_SOURCE/sounds"/*; do
+            if [ -f "$sound_file" ]; then
+                local filename
+                filename=$(basename "$sound_file")
+                
+                if cp -p "$sound_file" "$CLAUDE_HOOKS_DIR/sounds/$filename"; then
+                    chmod 644 "$CLAUDE_HOOKS_DIR/sounds/$filename"
+                    log_info "Installed sound file: sounds/$filename"
+                    ((hook_count++))
+                else
+                    log_error "Failed to install sound file: $filename"
+                    return 1
+                fi
+            fi
+        done
+    fi
+    
+    HOOKS_INSTALLED=$hook_count
+    log_info "Installed $hook_count hook files"
+    return 0
+}
+
 # BEHAVIOR 3: Installation Validation - following task blueprint requirements
 verify_installation() {
     local success=true
@@ -400,6 +514,19 @@ verify_installation() {
         fi
     fi
     
+    # Check hooks directory and files (optional)
+    if [ -d "$CLAUDE_HOOKS_DIR" ]; then
+        local hook_count
+        hook_count=$(find "$CLAUDE_HOOKS_DIR" -name "*.py" -o -name "*.md" -o -name "*.wav" 2>/dev/null | wc -l)
+        if [ "$hook_count" -gt 0 ]; then
+            log_info "Hooks verification: $hook_count files found"
+        else
+            log_info "Hooks directory exists but no files found (hooks are optional)"
+        fi
+    else
+        log_info "No hooks directory found (hooks are optional)"
+    fi
+    
     # Validate command file structure
     for cmd_file in "$CLAUDE_COMMANDS_DIR"/*.md; do
         if [ -f "$cmd_file" ]; then
@@ -425,6 +552,7 @@ show_installation_summary() {
     echo "  Templates installed: $TEMPLATES_INSTALLED (in $SDD_TEMPLATES_DIR)"
     echo "  Commands installed: $COMMANDS_INSTALLED (in $CLAUDE_COMMANDS_DIR)"
     echo "  Agents installed: $AGENTS_INSTALLED (in $CLAUDE_AGENTS_DIR)"
+    echo "  Hooks installed: $HOOKS_INSTALLED (in $CLAUDE_HOOKS_DIR)"
     echo
     log_info "SDD system is now ready to use!"
     log_info "Try: /init_greenfield your-project-name"
@@ -479,6 +607,7 @@ main() {
     install_templates || { log_error "Template installation failed"; exit 1; }
     install_commands || { log_error "Commands installation failed"; exit 1; }
     install_agents || { log_error "Agents installation failed"; exit 1; }
+    install_hooks || { log_error "Hooks installation failed"; exit 1; }
     
     # Validate installation
     verify_installation || { log_error "Installation verification failed"; exit 13; }

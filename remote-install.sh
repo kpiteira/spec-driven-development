@@ -24,6 +24,7 @@ readonly RAW_URL="$BASE_URL/raw/$REPO_VERSION"
 readonly SDD_TEMPLATES_DIR="${TEST_HOME:-$HOME}/.sdd/templates"
 readonly CLAUDE_COMMANDS_DIR="${TEST_HOME:-$HOME}/.claude/commands"  
 readonly CLAUDE_AGENTS_DIR="${TEST_HOME:-$HOME}/.claude/agents"
+readonly CLAUDE_HOOKS_DIR="${TEST_HOME:-$HOME}/.claude/hooks"
 
 # Temporary workspace for downloads
 readonly TEMP_DIR="/tmp/sdd-install-$$"
@@ -40,6 +41,7 @@ readonly NC='\033[0m' # No Color
 declare -i TEMPLATES_INSTALLED=0
 declare -i COMMANDS_INSTALLED=0
 declare -i AGENTS_INSTALLED=0
+declare -i HOOKS_INSTALLED=0
 
 # Logging functions
 log_info() { 
@@ -78,6 +80,7 @@ show_security_warning() {
     echo "  • Download and install templates to: $SDD_TEMPLATES_DIR"
     echo "  • Install Claude Code commands to: $CLAUDE_COMMANDS_DIR"
     echo "  • Install Claude Code agents to: $CLAUDE_AGENTS_DIR"
+    echo "  • Install Claude Code hooks to: $CLAUDE_HOOKS_DIR"
     echo
     echo "Source repository: $BASE_URL"
     echo "Version: $REPO_VERSION"
@@ -348,6 +351,7 @@ install_commands() {
     local commands=(
         "init_greenfield.md"
         "plan_milestone.md"
+        "task.md"
     )
     
     local command_count=0
@@ -378,8 +382,13 @@ install_agents() {
     # Agent files to download  
     local agents=(
         "architecture-specialist.md"
+        "bundler-specialist.md"
+        "coder-specialist.md" 
+        "milestone-planning-specialist.md"
         "requirements-specialist.md"
         "roadmap-specialist.md"
+        "task-blueprint-specialist.md"
+        "validator-specialist.md"
     )
     
     local agent_count=0
@@ -399,6 +408,107 @@ install_agents() {
     
     AGENTS_INSTALLED=$agent_count
     log_info "Installed $agent_count agent files"
+    return 0
+}
+
+# Download and install hooks
+install_hooks() {
+    log_info "Installing SDD hooks..."
+    
+    # Hooks are optional - create directory and try to download key files
+    mkdir -p "$CLAUDE_HOOKS_DIR" || {
+        log_warn "Cannot create hooks directory, skipping hooks installation"
+        return 0
+    }
+    
+    # Hook files to download
+    local hook_files=(
+        "README.md"
+        "sdd-session-logger.py"
+        "sdd-activity-logger.py"
+        "sdd-performance-tracker.py"
+        "sdd-session-summary.py"
+    )
+    
+    local lib_files=(
+        "lib/notification_system.py"
+    )
+    
+    local sound_files=(
+        "sounds/success.wav"
+        "sounds/error.wav" 
+        "sounds/warning.wav"
+        "sounds/progress.wav"
+    )
+    
+    local hook_count=0
+    
+    # Download main hook files
+    for hook_file in "${hook_files[@]}"; do
+        local url="$RAW_URL/.claude/hooks/$hook_file"
+        local temp_file="$TEMP_DIR/$(basename "$hook_file")"
+        local dest_file="$CLAUDE_HOOKS_DIR/$(basename "$hook_file")"
+        
+        if secure_download "$url" "$temp_file"; then
+            if [[ "$hook_file" == *.py ]]; then
+                # Python files need executable permissions
+                if cp "$temp_file" "$dest_file" && chmod 755 "$dest_file"; then
+                    log_info "Installed hook: $(basename "$hook_file")"
+                    ((hook_count++))
+                fi
+            else
+                # Markdown files use version comparison
+                if install_file_with_version "$temp_file" "$dest_file"; then
+                    ((hook_count++))
+                fi
+            fi
+        else
+            log_warn "Failed to download hook: $hook_file (continuing installation)"
+        fi
+    done
+    
+    # Download lib files
+    mkdir -p "$CLAUDE_HOOKS_DIR/lib" || {
+        log_warn "Cannot create hooks lib directory"
+    }
+    
+    for lib_file in "${lib_files[@]}"; do
+        local url="$RAW_URL/.claude/hooks/$lib_file"
+        local temp_file="$TEMP_DIR/$(basename "$lib_file")"
+        local dest_file="$CLAUDE_HOOKS_DIR/$lib_file"
+        
+        if secure_download "$url" "$temp_file"; then
+            if cp "$temp_file" "$dest_file" && chmod 644 "$dest_file"; then
+                log_info "Installed lib: $(basename "$lib_file")"
+                ((hook_count++))
+            fi
+        else
+            log_warn "Failed to download lib file: $lib_file (continuing installation)"
+        fi
+    done
+    
+    # Download sound files
+    mkdir -p "$CLAUDE_HOOKS_DIR/sounds" || {
+        log_warn "Cannot create hooks sounds directory"
+    }
+    
+    for sound_file in "${sound_files[@]}"; do
+        local url="$RAW_URL/.claude/hooks/$sound_file"
+        local temp_file="$TEMP_DIR/$(basename "$sound_file")"
+        local dest_file="$CLAUDE_HOOKS_DIR/$sound_file"
+        
+        if secure_download "$url" "$temp_file"; then
+            if cp "$temp_file" "$dest_file" && chmod 644 "$dest_file"; then
+                log_info "Installed sound: $(basename "$sound_file")"
+                ((hook_count++))
+            fi
+        else
+            log_warn "Failed to download sound file: $sound_file (continuing installation)"
+        fi
+    done
+    
+    HOOKS_INSTALLED=$hook_count
+    log_info "Installed $hook_count hook files"
     return 0
 }
 
@@ -438,6 +548,19 @@ verify_installation() {
         fi
     fi
     
+    # Check hooks (optional)
+    if [[ -d "$CLAUDE_HOOKS_DIR" ]]; then
+        local hook_count
+        hook_count=$(find "$CLAUDE_HOOKS_DIR" -name "*.py" -o -name "*.md" -o -name "*.wav" 2>/dev/null | wc -l)
+        if [[ $hook_count -gt 0 ]]; then
+            log_info "Hooks verified: $hook_count files found"
+        else
+            log_info "Hooks directory exists but no files found (hooks are optional)"
+        fi
+    else
+        log_info "No hooks directory found (hooks are optional)"
+    fi
+    
     if [[ "$success" == true ]]; then
         log_info "Installation verification passed"
         return 0
@@ -455,6 +578,7 @@ show_summary() {
     echo "  Templates installed: $TEMPLATES_INSTALLED (in $SDD_TEMPLATES_DIR)"
     echo "  Commands installed: $COMMANDS_INSTALLED (in $CLAUDE_COMMANDS_DIR)"
     echo "  Agents installed: $AGENTS_INSTALLED (in $CLAUDE_AGENTS_DIR)"
+    echo "  Hooks installed: $HOOKS_INSTALLED (in $CLAUDE_HOOKS_DIR)"
     echo
     echo "  Installation log: $INSTALL_LOG"
     echo
@@ -499,6 +623,7 @@ main() {
     install_templates || exit 1
     install_commands || exit 1
     install_agents || exit 1
+    install_hooks || exit 1
     
     # Verify and complete
     verify_installation || exit 1
