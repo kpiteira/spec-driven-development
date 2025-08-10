@@ -107,6 +107,7 @@ Create a compelling vision document directly using accumulated context from Phas
 - **Ask Questions**: Present alternatives to the user with pros/cons rather than making assumptions
 - **Use Requirements**: Base all decisions on actual requirements from the Product Requirements document
 - **Start Simple**: Favor simple solutions that can evolve over complex premature architectures
+- **Include Tooling Discussion**: Ensure Section 4 (Development Tooling and Quality Standards) defines project-specific tooling for testing, linting, security scanning, and validation workflows
 
 **Key Principles:**
 - Research before deciding
