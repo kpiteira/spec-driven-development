@@ -117,7 +117,73 @@ graph TB
 
 ---
 
-## 4. Sub-Agent Architecture
+## 4. Development Tooling and Quality Standards
+
+**What it is:** This section defines the development workflow, tooling choices, and quality standards for the SDD project. It provides guidance to agents and developers on how to build, test, and validate the SDD system consistently.
+
+### 4.1 Language and Runtime Environment
+
+* **Primary Language**: Markdown with YAML frontmatter (specification documents)
+* **Scripting**: Bash scripts for testing and utility functions  
+* **Configuration**: JSON for Claude Code settings and hooks
+* **Documentation**: Markdown with Mermaid diagrams for architecture visualization
+* **Package Management**: None required (specification-only repository with no build dependencies)
+
+### 4.2 Quality Tooling by Component
+
+#### Testing Infrastructure
+* **Testing Framework**: Bash-based testing with custom assertion functions
+* **Test Execution**: Direct bash script execution via `bash test-script.sh`  
+* **Test Organization**: Organized in `/tests/` directory with descriptive naming (`test-*.sh`)
+* **Assertion Functions**: Custom `assert_success()`, `assert_file_exists()`, `assert_contains()` functions
+* **Test Reporting**: Structured output with colored logging and detailed results
+
+#### Python Components (When Present)
+* **Testing**: pytest with configuration in `pytest.ini`, appropriate test discovery and options
+* **Type Checking**: mypy with configuration in `mypy.ini` for strict type checking
+* **Package Management**: Standard pip/python approach (no special package manager specified)
+* **Code Quality**: Follow standard Python conventions for any utility scripts
+
+#### Documentation and Configuration
+* **Markdown Linting**: Follow CommonMark specification for consistency
+* **YAML Validation**: Ensure valid YAML structure in frontmatter and configuration files
+* **JSON Validation**: Validate JSON configuration files for hooks and settings
+* **Link Validation**: Verify internal links between specification documents
+
+### 4.3 Validation Workflow and Standards
+
+The validation workflow ensures specification and code quality through these steps:
+
+1. **Specification Testing**: Bash-based tests validate that specifications produce expected system behavior
+2. **Documentation Consistency**: Cross-reference validation between specification documents  
+3. **Template Compliance**: Verify that generated documents follow established templates
+4. **Integration Testing**: End-to-end workflow validation using sample task blueprints
+5. **Quality Verification**: Ensure all specifications are actionable and complete
+
+**Validation Standards:**
+* **Required**: All bash tests must pass, specification documents must be internally consistent
+* **Required**: Template compliance for all generated specification documents
+* **Recommended**: Documentation completeness, clear examples in all templates
+* **Context-Sensitive**: Testing approaches should adapt based on what components are being validated (pure specification vs. code generation)
+
+**Validation Command Examples:**
+- Bash testing: `bash tests/test-end-to-end.sh` (execute specific test scripts)
+- Python components: `python3 -m pytest tests/ -v` (when Python testing is needed)
+- Integration testing: `bash tests/test-task-workflow-e2e.sh` (full workflow validation)
+
+### 4.4 SDD System Specific Considerations
+
+**Specification Validation**: Primary focus is on validating that specifications correctly drive the SDD workflow, not traditional code validation.
+
+**Agent Testing**: Testing validates agent behavior through bundle creation and task execution simulation rather than unit testing of agent code.
+
+**Workflow Testing**: End-to-end testing focuses on the complete specification-to-implementation pipeline working correctly.
+
+**Quality Focus**: Emphasis on specification completeness, template consistency, and workflow reliability rather than traditional code metrics.
+
+---
+
+## 5. Sub-Agent Architecture
 
 **What it is:** The specialized agent system that enables context isolation and prevents context pollution through focused, single-purpose agents with clean contexts.
 
@@ -334,7 +400,7 @@ Use Task tool to invoke "requirements-specialist" sub-agent with:
 
 ---
 
-## 5. Key Design Patterns & Conventions
+## 6. Key Design Patterns & Conventions
 
 **What it is:** Mandatory patterns and conventions to ensure the codebase is consistent, predictable, and maintainable.
 
@@ -359,7 +425,7 @@ Use Task tool to invoke "requirements-specialist" sub-agent with:
 
 ---
 
-## 6. Data Management
+## 7. Data Management
 
 **What it is:** How data is stored, managed, and accessed within the system.
 
@@ -396,7 +462,7 @@ graph TD
 
 ---
 
-## 7. Component Specifications
+## 8. Component Specifications
 
 **What it is:** Detailed specifications for each system component, defining their responsibilities, inputs, outputs, and interfaces.
 
@@ -518,7 +584,7 @@ graph TD
 2. **Execution:** Run linting, security scanning, unit tests, and integration tests
 3. **Reporting:** Provide precise failure details or success confirmation
 
-## 8. Workflow Specifications
+## 9. Workflow Specifications
 
 **What it is:** The detailed step-by-step process for task execution.
 
@@ -757,7 +823,7 @@ library.method(param: type) -> return_type
 
 ---
 
-## 10. Hook Integration Strategy
+## 11. Hook Integration Strategy
 
 **What it is:** Strategic use of Claude Code's native hook system for observability, logging, and notifications within the SDD workflow.
 
@@ -932,7 +998,7 @@ sys.exit(0)
 
 ---
 
-## 11. Cross-Cutting Concerns
+## 12. Cross-Cutting Concerns
 
 **What it is:** Architectural decisions that affect all components of the system.
 
@@ -962,7 +1028,7 @@ sys.exit(0)
 
 ---
 
-## 12. Architecture Decision Records (ADRs)
+## 13. Architecture Decision Records (ADRs)
 
 ### ADR-001: File System as Single Source of Truth
 
@@ -1051,7 +1117,7 @@ sys.exit(0)
 
 ---
 
-## 13. Deployment and Setup
+## 14. Deployment and Setup
 
 **What it is:** Deployment strategy and setup process for the SDD system.
 
