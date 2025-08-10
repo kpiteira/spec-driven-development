@@ -19,14 +19,22 @@ Transform task blueprints into production-ready code through **strict TDD workfl
 
 **Read and Process All Context Files:**
 - **task_blueprint.md** - Parse Section 2 (Given/When/Then behaviors) to understand the contract
-- **bundle_architecture.md** - Extract architectural rules and patterns (all are mandatory)
+- **bundle_architecture.md** - Extract architectural rules, patterns, and **Development Tooling Guidance** (all are mandatory)
 - **bundle_security.md** - Load security requirements (all are mandatory)  
 - **bundle_code_context.md** - Get exact interfaces and APIs (NEVER hallucinate beyond these)
 - **bundle_dependencies.md** - Understand available tools and integration points
 
+**Extract Development Tooling Context:**
+From bundle_architecture.md "Development Tooling and Quality Guidance" section:
+- **Testing Framework** - Understand which testing approach to use (pytest, Jest, cargo test, bash testing)
+- **Package Management** - Know how to execute tests (uv run pytest, npm test, cargo test)
+- **Code Quality Tools** - Understand project quality standards for generated code
+- **Validation Workflow** - Understand what validation the Validator Agent will apply
+
 **Create Implementation Plan:**
 - Break down Section 2 behaviors into specific test cases
 - Plan TDD implementation sequence (Red-Green-Refactor for each behavior)
+- **Choose appropriate test framework** based on tooling guidance
 - Identify architectural constraints and integration points
 - Create comprehensive todo list for tracking progress
 
@@ -48,8 +56,13 @@ Transform task blueprints into production-ready code through **strict TDD workfl
 **Red Phase (Write Failing Tests):**
 - For each Given/When/Then behavior in task blueprint Section 2:
   - Write specific test that validates the behavior
+  - **Use appropriate test framework** based on tooling guidance from bundle_architecture.md
   - Ensure test follows project testing conventions from bundle_code_context.md
-  - **MANDATORY**: Execute test and verify it FAILS before writing implementation
+  - **MANDATORY**: Execute test using appropriate command and verify it FAILS before writing implementation
+    - Testing: "pytest" + Package Management: "uv" → Use `uv run pytest [test_file]`
+    - Testing: "Jest" + Package Management: "npm" → Use `npm test [test_pattern]`
+    - Testing: "cargo test" → Use `cargo test [test_name]`
+    - Testing: "bash testing" → Use `bash [test_script]`
   - Use Bash tool to run tests and capture failure output
   - All tests must fail in Red phase - if any pass, stop and investigate
 
@@ -58,14 +71,16 @@ Transform task blueprints into production-ready code through **strict TDD workfl
 - Use ONLY interfaces documented in bundle_code_context.md
 - Follow architectural patterns from bundle_architecture.md
 - Implement security requirements from bundle_security.md
-- **MANDATORY**: Execute tests after implementation and verify they PASS
+- **MANDATORY**: Execute tests after implementation using appropriate tooling and verify they PASS
+  - Use same test execution approach as Red phase
 - Use Bash tool to run tests and capture success output
 
 **Refactor Phase (Code Quality):**
 - Improve code quality while maintaining test success
-- Follow project style conventions
+- Follow project style conventions from tooling guidance
 - Add appropriate documentation and error handling
 - **MANDATORY**: Re-run tests after refactoring to ensure they still pass
+  - Use same test execution approach as previous phases
 
 ### 4. Architectural Compliance Validation
 

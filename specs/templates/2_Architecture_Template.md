@@ -72,7 +72,86 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 4. Key Design Patterns & Conventions
+## 4. Development Tooling and Quality Standards
+
+**What it is:** This section defines the development workflow, tooling choices, and quality standards for the project. It provides guidance to agents and developers on how to build, test, and validate code consistently.
+
+**Best Practices:**
+
+* Specify tools and approaches as guidance, not rigid commands
+* Include rationale for tooling choices when non-obvious
+* Cover the complete development lifecycle: package management, testing, linting, type checking, security, and validation workflow
+* Consider multi-language projects by organizing by component or language
+
+### 4.1 Language and Runtime Environment
+
+**Guide Questions:**
+- What programming languages and versions are used?
+- What package managers or build tools are preferred?
+- Are there specific runtime requirements?
+
+**Example:**
+* **Backend**: Python 3.11+ with uv package manager (preferred for speed and reliability)
+* **Frontend**: TypeScript 5.x with Node.js 20 LTS using npm
+* **Database**: PostgreSQL 15+ for primary data storage
+
+### 4.2 Quality Tooling by Component
+
+**Guide Questions:**
+- What testing frameworks and approaches are used?
+- What linting and formatting standards are applied?
+- What type checking tools are required?
+- What security scanning tools are used?
+- How are dependencies managed and validated?
+
+**Example for Multi-Language Project:**
+
+#### Backend (Python)
+* **Package Management**: uv (not pip or poetry) for faster dependency resolution
+* **Testing**: pytest with coverage reporting, appropriate test discovery and options based on project needs
+* **Linting**: ruff for both linting and formatting (replaces flake8, black, isort)
+* **Type Checking**: mypy with configuration for strict type checking where appropriate
+* **Security**: bandit for static security analysis of Python code
+
+#### Frontend (TypeScript)
+* **Package Management**: npm (standard and reliable)
+* **Testing**: Jest with React Testing Library, with appropriate configuration for component testing
+* **Linting**: ESLint with TypeScript rules and Airbnb config
+* **Formatting**: Prettier for consistent code formatting
+* **Type Checking**: TypeScript compiler with strict mode enabled
+* **Build**: Vite for fast development and optimized production builds
+
+#### Integration and Cross-Component
+* **API Testing**: pytest with httpx for backend API testing
+* **E2E Testing**: Playwright for full user workflow testing
+* **Documentation**: JSDoc for TypeScript, docstrings for Python
+* **Git Hooks**: Pre-commit hooks for automatic quality checks
+
+### 4.3 Validation Workflow and Standards
+
+**Guide Questions:**
+- What is the order of validation steps?
+- What are the requirements vs. warnings?
+- How should validation failures be handled?
+
+**Example:**
+The validation workflow ensures code quality through these steps:
+
+1. **Unit Testing**: All components must have unit tests with appropriate coverage
+2. **Type Checking**: Both Python (mypy) and TypeScript (tsc) type checking must pass
+3. **Code Quality**: Linting and formatting checks provide guidance but may not block commits
+4. **Security Scanning**: Security vulnerabilities must be reviewed and addressed
+5. **Integration Testing**: API contracts and E2E user workflows must be validated
+6. **Build Verification**: All artifacts must build successfully
+
+**Validation Standards:**
+* **Required**: Unit tests, type checking, security review, successful build
+* **Recommended**: Code coverage above 80%, linting compliance, documentation updates
+* **Context-Sensitive**: Agents should choose appropriate test flags and options based on the specific changes and context
+
+---
+
+## 5. Key Design Patterns & Conventions
 
 **What it is:** A description of mandatory patterns and conventions to ensure the codebase is consistent, predictable, and maintainable. This is a critical ruleset for the `Coder Agent`.
 
@@ -91,7 +170,7 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 5. Repository Organization and File Structure
+## 6. Repository Organization and File Structure
 
 **What it is:** Standards for organizing files, directories, and project structure to ensure consistency and good user experience.
 
@@ -130,7 +209,7 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 6. Data Management
+## 7. Data Management
 
 **What it is:** A description of how data is stored, managed, and accessed.
 
@@ -147,7 +226,7 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 7. Cross-Cutting Concerns
+## 8. Cross-Cutting Concerns
 
 **What it is:** A plan for handling concerns that affect all parts of the system.
 
@@ -159,7 +238,7 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 8. User & Developer Experience Patterns
+## 9. User & Developer Experience Patterns
 
 **What it is:** Document your approaches to user interface design and developer workflow - information that can be learned and suggested for future projects.
 
@@ -180,7 +259,7 @@ description: "Template for technical architecture and design decisions"
 
 ---
 
-## 9. Architecture Decision Records (ADRs) (Optional, but highly recommended)
+## 10. Architecture Decision Records (ADRs) (Optional, but highly recommended)
 
 **What it is:** A collection of short documents, each describing a single, significant architectural decision. This creates a historical record of *why* the architecture is the way it is.
 

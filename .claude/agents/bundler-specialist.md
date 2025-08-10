@@ -55,6 +55,19 @@ You must produce:
   - **Usage:** [How to use this existing pattern]
   - **Key Components:** [Critical elements and interfaces]
 
+## Development Tooling and Quality Guidance
+[Extract tooling guidance from Section 4 of 2_Architecture.md]
+
+### Project Tooling Standards
+- **Package Management:** [Extracted guidance, e.g., "uv for Python", "npm for TypeScript"]
+- **Testing:** [Extracted guidance, e.g., "pytest with appropriate options based on context"]
+- **Code Quality:** [Extracted guidance for linting, formatting, type checking]
+- **Security:** [Extracted guidance for security scanning tools]
+- **Validation Workflow:** [Extracted validation order and requirements]
+
+### Tooling Context for Task Implementation
+[Specific tooling considerations relevant to this task category]
+
 ## Relevant Architectural Rules
 [Extracted rules from Architecture.md that apply to this task]
 
@@ -137,10 +150,41 @@ ls -la .claude/agents/
 4. **Usage Pattern Analysis**: Identify how existing patterns are used throughout the codebase
 
 ### Context Extraction Techniques
-- **Architecture Rule Mining**: Extract specific rules from Architecture.md that apply to the current task
+- **Architecture Rule Mining**: Extract specific rules from 2_Architecture.md that apply to the current task
+- **Tooling Guidance Extraction**: Extract development tooling guidance from Section 4 of 2_Architecture.md
 - **Code Pattern Discovery**: Find existing implementations that solve similar problems
 - **Interface Documentation**: Document exact APIs, signatures, and usage patterns
 - **Dependency Analysis**: Map both internal and external dependencies with specific versions
+
+### Tooling Guidance Fallback Strategy
+
+When Development Tooling section is missing from 2_Architecture.md:
+
+1. **Discovery from Project Files**: Use standard project configuration discovery:
+   ```bash
+   # Look for common configuration files
+   find . -maxdepth 2 -name "package.json" -o -name "pyproject.toml" -o -name "Cargo.toml" -o -name "go.mod"
+   
+   # Check for testing configuration
+   find . -maxdepth 2 -name "pytest.ini" -o -name "jest.config.*" -o -name ".eslintrc.*"
+   
+   # Look for quality configuration files
+   find . -maxdepth 2 -name ".flake8" -o -name "mypy.ini" -o -name "tslint.json"
+   ```
+
+2. **Infer from Discovered Files**:
+   - `package.json` → Node.js/TypeScript project, check "scripts" section for test/lint commands
+   - `pyproject.toml` → Modern Python project, look for tool configurations
+   - `pytest.ini`/`mypy.ini` → Python testing/type checking setup
+   - `Cargo.toml` → Rust project with cargo test/clippy
+
+3. **Document the Gap**: Include in bundle_architecture.md:
+   ```markdown
+   ## Development Tooling Gap
+   **Missing tooling guidance**: No Development Tooling section found in 2_Architecture.md.
+   **Discovered configuration**: [List found config files]
+   **Recommendation**: User should add Section 4 (Development Tooling and Quality Standards) to 2_Architecture.md
+   ```
 
 ### Quality Validation Requirements
 - **Accuracy Verification**: Cross-reference all extracted signatures with source files
@@ -213,7 +257,15 @@ You now possess sophisticated context extraction algorithms that enable you to f
 
 **Architecture Rule Mining Process:**
 1. Use Read tool to analyze `project_sdd_on_claude/2_Architecture.md`
-2. Use Grep tool to extract sections relevant to task category:
+2. **Extract Development Tooling Guidance** (Critical for Validator Agent):
+   ```bash
+   # Extract the Development Tooling section (Section 4 in Architecture Template)
+   grep -A 50 -i "Development Tooling\|Quality Standards" project_sdd_on_claude/2_Architecture.md
+   
+   # Look for specific tooling patterns
+   grep -A 10 -B 2 -i "package management\|testing\|linting\|type check\|security\|validation" project_sdd_on_claude/2_Architecture.md
+   ```
+3. Use Grep tool to extract sections relevant to task category:
    ```bash
    # For CLI tasks, search for CLI-related architectural patterns
    grep -A 5 -B 1 -i "cli\|command\|argument" project_sdd_on_claude/2_Architecture.md
@@ -221,8 +273,8 @@ You now possess sophisticated context extraction algorithms that enable you to f
    # For API tasks, extract API patterns
    grep -A 5 -B 1 -i "api\|endpoint\|route" project_sdd_on_claude/2_Architecture.md
    ```
-3. Filter extracted rules for actionable, specific guidance (not generic principles)
-4. Focus on constraints, patterns, and anti-patterns relevant to the task
+4. Filter extracted rules for actionable, specific guidance (not generic principles)
+5. Focus on constraints, patterns, and anti-patterns relevant to the task
 
 ### Behavior 2: Semantic Code Pattern Discovery with Serena MCP
 

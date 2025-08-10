@@ -21,10 +21,15 @@ Execute **systematic validation** of generated code through comprehensive qualit
 
 **Load Complete Validation Context:**
 - **task_blueprint.md** - Understand validation requirements from Section 2 behaviors
-- **bundle_architecture.md** - Extract project-specific validation rules and quality standards
+- **bundle_architecture.md** - **Extract Development Tooling and Quality Guidance** (Section: Development Tooling and Quality Guidance)
 - **bundle_security.md** - Load security validation requirements (all mandatory)
 - **bundle_code_context.md** - Understand testing patterns and integration points
-- **bundle_dependencies.md** - Determine available validation tools and configuration
+- **bundle_dependencies.md** - Understand project dependencies and integration points
+
+**Critical: Extract Tooling Guidance from Bundle:**
+From bundle_architecture.md, extract the "Development Tooling and Quality Guidance" section which contains:
+- Project Tooling Standards (package management, testing, code quality, security, validation workflow)
+- Tooling Context for Task Implementation (task-specific tooling considerations)
 
 **Update Bundle Status to Validation Phase:**
 - Read current bundle_status.yaml and verify `coder_agent_completed: true`
@@ -37,16 +42,36 @@ Execute **systematic validation** of generated code through comprehensive qualit
 - Verify previous phases completed successfully before proceeding
 - Never fabricate timing or status information
 
+**Handling Missing Tooling Guidance:**
+If "Development Tooling and Quality Guidance" section is missing from bundle_architecture.md:
+1. **Check for "Development Tooling Gap" section** - Bundler may have documented discovered configuration
+2. **Request User Guidance**: Update bundle_status.yaml to "validation_failed" with message:
+   ```
+   Missing tooling guidance: No Development Tooling section found in bundle_architecture.md
+   Recommendation: Add Section 4 (Development Tooling and Quality Standards) to 2_Architecture.md
+   ```
+3. **DO NOT proceed** with hard-coded assumptions - this violates the guidance-driven principle
+
 ### 2. Test Execution and Validation (Critical - Hard Stop on Failure)
 
-**Test Discovery and Preparation:**
-- Use LS tool to locate all test files (test_*.py, test_*.sh, *_test.py)
-- Identify test framework (pytest, unittest, bash-based)
-- Locate task-specific tests first, then run comprehensive test suite
+**Tooling-Guided Test Discovery:**
+- Read "Testing" guidance from bundle_architecture.md tooling section
+- Interpret testing guidance to determine appropriate test commands:
+  - "pytest with appropriate options" → Use `pytest` with context-appropriate flags
+  - "Jest with React Testing Library" → Use `npm test` or `yarn test`
+  - "cargo test" → Use `cargo test` for Rust projects
+  - "bash-based testing" → Look for test-*.sh files and execute them
+- Use LS tool to locate test files based on project patterns
+- Prioritize task-specific tests, then run comprehensive test suite
 
 **Test Execution (Mandatory - No Simulation):**
+- **Interpret Tooling Guidance** to construct appropriate test command:
+  - Package Management: "uv" + Testing: "pytest" → `timeout 300 uv run pytest -v`
+  - Package Management: "npm" + Testing: "Jest" → `timeout 300 npm test`
+  - Testing: "cargo test" → `timeout 300 cargo test`
+  - Testing: "bash testing framework" → `timeout 300 bash test-suite.sh`
+- **Choose Appropriate Options** based on context and project needs
 - Execute ALL tests using Bash tool with appropriate timeouts
-- Use actual commands: `timeout 300 python3 -m pytest tests/ -v --tb=short`
 - Capture complete stdout/stderr output for analysis
 - **CRITICAL**: Parse actual test results - never assume or fabricate success
 
@@ -59,11 +84,21 @@ Execute **systematic validation** of generated code through comprehensive qualit
 
 ### 3. Static Analysis and Code Quality Validation
 
+**Tooling-Guided Quality Checks:**
+- Read "Code Quality" guidance from bundle_architecture.md tooling section
+- Interpret quality tool guidance to construct appropriate commands:
+  - "ruff for linting and formatting" → `timeout 120 uv run ruff check .` and `timeout 120 uv run ruff format --check`
+  - "ESLint with TypeScript rules" → `timeout 120 npm run lint` or `npx eslint .`
+  - "Prettier for formatting" → `timeout 120 npm run format:check` or `npx prettier --check .`
+  - "clippy for Rust" → `timeout 120 cargo clippy`
+  - "golangci-lint for Go" → `timeout 120 golangci-lint run`
+
 **Quality Tool Execution (With Graceful Degradation):**
 - Execute available tools with timeouts, handle missing tools gracefully
-- Run linting: `timeout 120 python3 -m flake8 . 2>/dev/null || echo "flake8 not available"`
-- Run formatting: `timeout 120 python3 -m black --check . 2>/dev/null || echo "black not available"`
-- Run type checking: `timeout 180 python3 -m mypy . 2>/dev/null || echo "mypy not available"`
+- **Interpret Package Management + Quality Tools**:
+  - Package Management: "uv" + Linting: "ruff" → `timeout 120 uv run ruff check . 2>/dev/null || echo "ruff not available"`
+  - Package Management: "npm" + Linting: "ESLint" → `timeout 120 npm run lint 2>/dev/null || echo "ESLint not available"`
+  - Linting: "cargo clippy" → `timeout 120 cargo clippy 2>/dev/null || echo "clippy not available"`
 
 **Quality Analysis and Categorization:**
 - Parse tool outputs to extract specific violations with line numbers
@@ -78,9 +113,20 @@ Execute **systematic validation** of generated code through comprehensive qualit
 
 ### 4. Security Scanning and Validation
 
+**Tooling-Guided Security Scanning:**
+- Read "Security" guidance from bundle_architecture.md tooling section
+- Interpret security tool guidance to construct appropriate commands:
+  - "bandit for Python security" → `timeout 180 uv run bandit -r . -f json`
+  - "safety for Python dependencies" → `timeout 120 uv run safety check`
+  - "npm audit for Node.js dependencies" → `timeout 120 npm audit`
+  - "cargo audit for Rust dependencies" → `timeout 180 cargo audit`
+  - "gosec for Go security" → `timeout 180 gosec ./...`
+
 **Security Tool Execution:**
-- Run security scanning: `timeout 180 python3 -m bandit -r . -f json 2>/dev/null || echo "bandit not available"`
-- Check dependencies: `timeout 120 python3 -m safety check 2>/dev/null || echo "safety not available"`
+- **Interpret Package Management + Security Tools**:
+  - Package Management: "uv" + Security: "bandit" → `timeout 180 uv run bandit -r . -f json 2>/dev/null || echo "bandit not available"`
+  - Package Management: "npm" + Security scanning → `timeout 120 npm audit 2>/dev/null || echo "npm audit failed"`
+  - Security: "cargo audit" → `timeout 180 cargo audit 2>/dev/null || echo "cargo audit not available"`
 - Manual security review based on bundle_security.md requirements
 
 **Security Result Processing:**
