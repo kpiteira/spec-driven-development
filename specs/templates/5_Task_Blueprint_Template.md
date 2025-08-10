@@ -73,4 +73,4 @@ branch: "feature/TASK-XXX-[short-description]"
 
 * **Unit Test Scope:** The `Validator Agent` must find and run the unit tests associated with the code changed in this task. These tests must cover all behaviors defined in Section 2.
 * **Integration Test Scope:** This task is part of the "User Signup Flow" slice. The `Validator Agent` must run the relevant end-to-end tests for this slice as defined in the `Milestone Plan`.
-* **Project-Wide Checks:** The `Validator Agent` must run all standard project-wide quality checks (e.g., linting, security scanning) as defined in `quality.toml`.
+* **Project-Wide Checks:** The `Validator Agent` must run all standard project-wide quality checks (e.g., linting, security scanning) as defined in the "Development Tooling and Quality Standards" section of `2_Architecture.md`.

@@ -57,7 +57,6 @@ graph TB
         
         subgraph "Working Store"
             WORK["/.task_bundles/"]
-            CONF["/quality.toml"]
         end
         
         subgraph "Output Store"
@@ -105,7 +104,7 @@ graph TB
 | **Agent Orchestration**| [Sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents) | Native sub-agent system defined as Markdown files with YAML frontmatter (`.claude/agents/*.md`) for specialized tasks |
 | **Event System**       | [Hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) | Native hook system configured via JSON in settings files (`.claude/settings.json`) for observability and logging |
 | **Specification**      | Markdown                | Human-readable, version-controllable format for all specification documents      |
-| **Quality Config**     | TOML                    | Configuration format for quality checks and validation rules (`quality.toml`)           |
+| **Quality Standards**  | Markdown (Architecture) | Quality checks and validation rules defined in Architecture.md Section 4                |
 | **Diagramming**        | Mermaid                 | Embedded diagrams in Markdown for architecture visualization           |
 
 **System-Specific Configuration Details:**
@@ -569,7 +568,7 @@ graph TD
 **Inputs:**
 
 - Task Bundle directory
-- `/quality.toml` configuration
+- Development Tooling guidance from Architecture.md Section 4
 - Task Blueprint verification context
 - Milestone Plan integration tests (if applicable)
 
@@ -623,7 +622,7 @@ sequenceDiagram
     C-->>O: Implementation complete
     
     O->>V: Validate implementation
-    V->>FS: Read quality.toml
+    V->>FS: Read tooling guidance from Architecture
     V->>FS: Run all checks
     alt Validation passes
         V-->>O: PASS
@@ -1145,6 +1144,6 @@ sys.exit(0)
 **Task-Specific Validation:**
 
 - **Validation Scope:** Determined by task requirements and existing project standards
-- **Standard Checks:** Unit tests, linting, security scanning as configured in `quality.toml`
+- **Standard Checks:** Unit tests, linting, security scanning as configured in Architecture.md Section 4
 - **Extensible Framework:** Additional quality checks can be added based on project needs
 - **Test Types:** Focus on required tests (unit tests, linters) rather than comprehensive test suites

@@ -50,7 +50,7 @@ This is the fundamental, repeatable building block of all work done in the syste
     * Finally, it writes the code required to make the tests pass, adhering to all guidance.
 
 5. **Verification (The Validator Agent):** Once the implementation is complete, a fresh **Validator Agent** is spawned.
-    * **Test Plan Assembly:** It reads the `Verification Context` from the `Task Blueprint`, the integration tests from the `Milestone Plan`, and the project-wide checks from `quality.toml` to build a comprehensive test plan.
+    * **Test Plan Assembly:** It reads the `Verification Context` from the `Task Blueprint`, the integration tests from the `Milestone Plan`, and the project-wide checks from the "Development Tooling and Quality Standards" section of `2_Architecture.md` to build a comprehensive test plan.
     * **Execution:** It runs all relevant checks, including linting, security scanning, unit tests, and integration tests.
     * The Validator reports a single `pass` or `fail` verdict. A failure in *any* of these steps results in an overall `fail`.
 
@@ -64,16 +64,18 @@ This is the fundamental, repeatable building block of all work done in the syste
 
 ## 4. Appendix: Example Artifacts
 
-### Quality & Security Configuration (`quality.toml`)
+### Quality & Security Configuration (Architecture-Based)
 
-This project-level file defines the commands for the Validator Agent to discover and run tests and checks.
+Project-level tooling standards are now defined in Section 4 ("Development Tooling and Quality Standards") of the `2_Architecture.md` file. This architecture-based approach allows for flexible, project-specific tooling configuration instead of hard-coded tool assumptions.
 
-```toml
-[quality_checks]
-linter = "black --check ."
-type_checker = "mypy src/"
-security_scanner = "bandit -r src/ -ll"
-test_runner = "pytest"
+**Example Architecture Section:**
+```markdown
+### Development Tooling by Component
+#### Backend (Python)
+* **Package Management**: uv (not pip or poetry) for faster dependency resolution  
+* **Testing**: pytest with coverage reporting, appropriate test discovery and options
+* **Linting**: ruff for both linting and formatting (replaces flake8, black, isort)
+* **Type Checking**: mypy with strict configuration for production code quality
 ```
 
 ### Example Task Blueprint (`specs/tasks/TASK-042_...md`)

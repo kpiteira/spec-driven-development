@@ -97,8 +97,7 @@ Project/
 │   ├── 3_Roadmap.md            # When it will be built
 │   ├── milestones/             # Detailed milestone plans
 │   └── tasks/                  # Atomic work units
-├── .task_bundles/              # Agent workspaces
-└── quality.toml               # Validation rules
+└── .task_bundles/              # Agent workspaces
 ```
 
 ### The Assembly Line Process
