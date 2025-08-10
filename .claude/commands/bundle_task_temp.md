@@ -1,42 +1,80 @@
 ---
 name: bundle_task_temp
-description: "Temporary command to generate task bundles for SDD workflow (until TASK-XXX implements this feature)"
-model: claude-sonnet-4-20250514
-argument-hint: "TASK-001"
-allowed-tools: ["Read", "Write", "Glob", "Grep", "LS", "MultiEdit"]
+description: "Create task bundle using the SDD bundling workflow (extracted from /task command)"
+argument-hint: "TASK-XXX"
+allowed-tools: ["Read", "Write", "LS", "Bash", "Task"]
 ---
 
-You are the **Bundler Agent** in the SDD (Spec-Driven Development) system. Your role is to create comprehensive task bundles that provide all the context needed for the Coder Agent to implement tasks without hallucination.
+# Bundle Task Command - SDD Bundling Workflow
 
-## Your Mission
+Create a task bundle using the SDD bundling workflow extracted from the main `/task` command. This command handles Phase 1 (Bundle Creation) and Phase 2 (Bundler Agent Invocation) of the SDD assembly line.
 
-Generate a complete task bundle for the specified task ID that includes:
-1. **Architecture context** - relevant rules and constraints from the project architecture
-2. **Security guidance** - proactive security recommendations for this specific task
-3. **Code context** - exact interfaces, signatures, and documentation to prevent hallucination
-4. **Dependencies** - external libraries and their specific APIs that will be used
+## Bundling Process
 
-## Process
+### Phase 1: Input Validation & Bundle Creation
 
-1. **Read the task blueprint** to understand the requirements and context
-2. **Extract architecture rules** from `specs/2_Architecture.md` that apply to this task
-3. **Identify security considerations** based on the task type and requirements
-4. **Research relevant code context** including:
-   - Existing file structures and patterns in the project
-   - External library documentation (Claude Code commands, filesystem APIs, etc.)
-   - Template structures from `specs/templates/`
-5. **Generate bundle files** in the task directory
+1. **Validate Task ID**: Ensure task ID matches pattern `TASK-\d+` (e.g., TASK-006, TASK-1234)
+   - Reject invalid formats with clear error message
+   - Check that task blueprint exists in `project_sdd_on_claude/tasks/TASK-XXX_*.md`
 
-## Bundle File Structure
+2. **Create Task Bundle**: Create bundle directory structure
+   - Create `.task_bundles/TASK-XXX/` directory 
+   - Copy task blueprint to bundle directory as `task_blueprint.md`
+   - Create initial `bundle_status.yaml` with status: "created"
+   - Context files (`bundle_*.md`) will be created by Bundler Agent
 
-Create these files in `.task_bundles/[TASK_ID]/`:
-- `bundle_architecture.md` - Relevant architecture rules and constraints
-- `bundle_security.md` - Security guidance specific to this task
-- `bundle_code_context.md` - Exact interfaces and signatures to prevent hallucination
-- `bundle_dependencies.md` - External library APIs and usage patterns
+3. **Handle Conflicts**: If bundle directory already exists
+   - Preserve existing bundle with timestamp suffix
+   - Create new bundle for current execution
+   - Report preservation to user
+
+### Phase 2: Bundler Agent Invocation
+
+1. **Invoke Bundler Agent**: Use Task tool with "bundler-agent" subagent
+   - Provide complete task context and bundle path
+   - Request creation of context files: `bundle_architecture.md`, `bundle_security.md`, `bundle_code_context.md`, `bundle_dependencies.md`
+   - Update bundle status to "bundling"
+
+2. **Validate Bundle Context**: Verify Bundler Agent completed successfully
+   - Confirm required context files were created
+   - Update bundle status to "ready_for_coding"
+
+## Security & Quality Standards
+
+**Input Validation:**
+- Validate task ID format using secure regex patterns
+- Prevent path traversal attacks in all file operations
+- Sanitize all user inputs before processing
+
+**Bundle Management:**
+- Use atomic operations where possible
+- Maintain consistent filesystem state
+- Provide clear error messages and recovery guidance
+
+**Agent Coordination:**
+- Ensure clean context isolation for Bundler Agent
+- Pass only necessary, sanitized information to sub-agent
+- Maintain bundle status throughout workflow
+
+## Success Criteria
+
+The command succeeds when:
+1. Task bundle is created with correct structure and status tracking
+2. Bundler Agent completes successfully and creates all required context files
+3. Bundle status is updated to "ready_for_coding"
+4. User receives clear confirmation of bundle creation
+
+## Error Handling
+
+**Common Failure Modes:**
+- Invalid task ID format → Clear format requirements
+- Missing task blueprint → Guide user to check task files
+- Bundler Agent invocation failure → Preserve bundle state and provide debugging info
+
+Report all errors clearly with actionable next steps for the user.
 
 ## Task ID
 
 Process the task: **{argument}**
 
-Start by reading the task blueprint and then systematically build the complete bundle following the SDD methodology.
+Start by validating the task ID, creating the bundle structure, and invoking the bundler-agent specialist.

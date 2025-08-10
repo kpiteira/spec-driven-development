@@ -5,3 +5,6 @@
 
 # Generated test reports - transient artifacts
 reports/
+
+# Serena MCP cache files - machine-specific temporary data
+.serena/cache/
