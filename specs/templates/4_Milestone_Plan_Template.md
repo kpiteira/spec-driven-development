@@ -101,3 +101,39 @@ description: "Template for detailed milestone execution planning"
 * **Final Milestone Acceptance Tests:**
   * After all slices are complete, a full regression test suite is run.
   * A performance test is run on all new public-facing API endpoints.
+
+---
+
+## 5. Common Pitfalls to Avoid
+
+**What it is:** Anti-patterns that lead to over-engineered, unrealistic milestone plans. Use this section to validate your plan follows simplicity principles.
+
+### ❌ Avoid These Patterns
+
+* **Over-Engineering**: Creating complex systems when simple solutions exist
+  * Example: Building a "milestone acceptance test parser" instead of having AI agents read test descriptions directly
+* **Parsing Obsession**: Building parsers for structured data when AI agents can read documents directly
+  * Example: Creating JSON extractors when agents can understand markdown naturally
+* **Reinventing Infrastructure**: Creating new systems instead of leveraging existing components
+  * Example: Building new validation frameworks instead of using existing test commands
+* **Abstract Tasks**: Tasks without concrete deliverables or clear implementation paths
+  * Example: "Design the architecture" instead of "Create config file with API endpoints"
+* **Big Bang Tasks**: Tasks taking more than 8 hours to complete
+  * Example: "Implement complete user management system" instead of breaking into smaller pieces
+
+### ✅ Instead, Prefer These Patterns
+
+* **Simple Prompt Engineering**: Use AI capabilities directly rather than building complex systems
+* **Configuration Over Implementation**: Modify config files and prompts rather than writing new code
+* **Extension Over Creation**: Enhance existing components rather than building from scratch
+* **Concrete Deliverables**: Each task produces specific files, commands, or visible functionality
+* **Template Baseline**: Match the complexity level shown in the template examples above
+
+### Complexity Check
+
+**Before finalizing your milestone plan, verify:**
+- Average task complexity ≤ Level 2.5 (see complexity scoring in planning command)
+- No individual task > Level 3 complexity
+- Each task takes 2-8 hours to complete
+- You can explain each task in one simple sentence
+- Each task leverages existing infrastructure rather than creating new systems

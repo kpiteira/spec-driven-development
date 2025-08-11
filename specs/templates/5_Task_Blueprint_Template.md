@@ -23,7 +23,53 @@ branch: "feature/TASK-XXX-[short-description]"
 
 ---
 
-## 2. The Contract: Requirements & Test Cases
+## 2. Integration Context
+
+**What it is:** This section explains how this task fits into the larger milestone and system architecture, providing the "why" and "how it connects" context that prevents hallucination and ensures proper integration.
+
+**Source:** Defined by the Human Architect during milestone planning.
+
+### Why This Task Exists
+[One sentence explaining the milestone-level goal this task serves]
+
+**Example:**
+> This task enables user account creation, which is required for the user authentication flow that all other features depend on.
+
+### Dependencies & Flow
+- **Requires**: [List tasks that must complete before this one]
+- **Enables**: [List tasks that this one unblocks]  
+- **Parallel OK**: [List tasks that can run simultaneously with this one]
+
+**Example:**
+- **Requires**: TASK-001 (Database schema setup)
+- **Enables**: TASK-003 (User login endpoint), TASK-004 (Profile management)
+- **Parallel OK**: TASK-005 (Email validation service)
+
+### Architectural Integration
+- **Leverages**: [Existing components/patterns this task uses]
+- **Creates**: [New capabilities this task adds]
+- **Modifies**: [Existing components this task changes]
+
+**Example:**
+- **Leverages**: Database connection pool, password hashing utility, input validation middleware
+- **Creates**: User registration endpoint, user model validation
+- **Modifies**: API routing table, database migrations
+
+### Implementation Guidance
+- **Approach**: [High-level strategy without full implementation details]
+- **Key Files**: [Primary files/directories this task will affect]
+- **Complexity**: [Level 1-5 with brief justification]
+- **Time Estimate**: [2-8 hours with reasoning]
+
+**Example:**
+- **Approach**: Create Express.js POST endpoint using existing middleware patterns
+- **Key Files**: `src/routes/users.js`, `src/models/User.js`, `migrations/001_create_users.sql`
+- **Complexity**: Level 2 (simple integration with existing patterns)
+- **Time Estimate**: 4 hours (endpoint + tests + validation)
+
+---
+
+## 3. The Contract: Requirements & Test Cases
 
 **What it is:** The specific, testable requirements for this single component. This section is the **contract** that the `Coder Agent` must fulfill. It defines what "done" looks like and serves as the primary input for writing unit tests.
 **Source:** Defined by the Human Architect.
@@ -50,7 +96,7 @@ branch: "feature/TASK-XXX-[short-description]"
 ---
 ---
 
-## 3. Context Bundle (Agent-Populated Sibling Files)
+## 4. Context Bundle (Agent-Populated Sibling Files)
 
 **What it is:** This section serves as a manifest, reminding the `Coder Agent` that its full context is provided in separate files within the Task Bundle directory. These files are dynamically created by the `Bundler` and `Security Consultant` agents.
 
@@ -64,7 +110,7 @@ branch: "feature/TASK-XXX-[short-description]"
 
 ---
 
-## 4. Verification Context
+## 5. Verification Context
 
 **What it is:** High-level pointers for the `Validator Agent`. This is not a list of commands, but a guide to where the verification requirements are defined.
 **Source:** Defined by the Human Architect.

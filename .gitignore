@@ -137,3 +137,6 @@ TASK-*-IMPLEMENTATION-SUMMARY.md
 # Temporary files
 *.tmp
 *.temp
+
+# Archive directory - backup of previous work for comparison
+archive/

@@ -43,7 +43,96 @@ If any required specification is missing, guide the user to complete their speci
 
 **Immediate Handoff**: After basic context validation, immediately proceed to Phase 3 specialist invocation. The milestone-planning-specialist will identify strategic gaps and generate appropriate questions.
 
-## Phase 3: Hybrid Document Generation - Milestone Plan Creation
+## Phase 2.5: Mandatory Simplicity Principles
+
+**CRITICAL**: Before any specialist invocation, establish these universal constraints that apply to ALL projects:
+
+### Simplicity Principles (Project-Agnostic)
+
+1. **Study Existing Patterns**: Review previous milestones if they exist - identify what made them successful
+2. **Leverage Over Create**: Extend existing components rather than building new infrastructure
+3. **Atomic Tasks**: Each task must be completable in 2-8 hours
+4. **Concrete Over Abstract**: Specify actual files, commands, and outputs - no abstract architectural discussions
+5. **Template Baseline**: Match the complexity level shown in template examples
+
+### Complexity Scoring System
+
+**Task Complexity Levels**:
+- **Level 1**: Configuration/prompt changes, file modifications
+- **Level 2**: Simple integrations with existing systems
+- **Level 3**: New components with clear, defined boundaries
+- **Level 4**: Multi-component systems requiring coordination
+- **Level 5**: Architectural changes affecting multiple systems
+
+**Mandatory Limits**:
+- Average milestone complexity ≤ 2.5
+- No individual task > Level 3
+- If any task seems Level 4+, break it down or simplify approach
+
+### Anti-Pattern Detection
+
+**Immediately reject specialist proposals containing**:
+- Complex parsing systems (AI agents read documents directly)
+- "Intelligent analysis engines" or "smart processors"
+- Reinventing existing infrastructure
+- Abstract tasks without concrete deliverables
+- "Big bang" tasks taking more than 8 hours
+
+**Pass these constraints to the specialist with every invocation.**
+
+## Phase 2.6: Learn from History
+
+**Before beginning milestone planning, integrate learnings from previous experience:**
+
+1. **Read Previous Retrospectives**: Check for retrospective files in `specs/retrospectives/*.md`
+   - Extract patterns that worked well
+   - Note complexities to plan for
+   - Identify specific recommendations to apply
+
+2. **Pass Historical Context to Specialist**: Include retrospective insights in specialist instructions:
+   - "Apply these successful patterns: [list from retrospectives]"
+   - "Avoid these identified pitfalls: [list from retrospectives]"
+   - "Account for these discovered complexities: [specific factors from experience]"
+
+## Phase 3: Iterative Discovery Process
+
+**CRITICAL**: Use multi-phase discovery conversation to prevent over-engineering and ensure concrete, implementable plans.
+
+### Step 3.1: Initial Analysis & Hypothesis Formation
+**Main Agent → Milestone Planning Specialist**:
+"Analyze project context and create:
+1. Initial hypothesis about milestone goals and key capabilities
+2. Rough feature/task list with rationale for each
+3. Strategic questions needing user input for concrete specification  
+4. Complexity assessment using simplicity principles and template examples"
+
+**Quality Gate**: Main Agent verifies specialist output contains:
+- Questions that are specific and actionable (not abstract)
+- Rough plan follows simplicity principles from Phase 2.5
+- Features clearly leverage existing infrastructure where possible
+- 5-10 strategic questions for user clarification
+
+### Step 3.2: User Discovery Conversation
+**Main Agent ↔ User**:
+- Present rough plan and strategic questions conversationally
+- Explore each feature in detail - get specific about files, commands, integration points
+- Challenge complexity: "Could we use existing X instead of building Y?"
+- Document specific implementation decisions and approaches
+- Continue until concrete implementation approaches are clear
+
+### Step 3.3: Iteration Decision Point
+**Specialist Assessment**: "Do I have enough concrete detail to create atomic tasks?"
+- **If NO**: Generate more targeted questions focusing on implementation specifics
+- **If YES**: Proceed to detailed milestone plan creation with discovered constraints
+
+### Step 3.4: Detailed Plan Creation with Discovered Constraints
+**Main Agent → Specialist**: Create detailed milestone plan using:
+- All discovered implementation specifics as requirements (not suggestions)
+- Simplicity principles and anti-pattern constraints from Phase 2.5
+- Historical learnings from Phase 2.6
+- Concrete integration approaches from discovery conversation
+
+## Phase 4: Hybrid Document Generation - Milestone Plan Creation
 
 **CRITICAL**: Follow the validated hybrid approach: **Main Agent handles user conversation**. **Specialist Sub-Agents** handle document creation with iterative refinement. The process is: Main Agent ↔ Sub-Agent ↔ Main Agent ↔ User.
 
@@ -75,7 +164,7 @@ If any required specification is missing, guide the user to complete their speci
 - **Testing & Verification Plan**: Project-level quality checks and per-slice validation approach
 - **Definition of Done**: Specific criteria for milestone completion
 
-## Phase 4: Hybrid Document Generation - Task Blueprint Creation
+## Phase 5: Hybrid Document Generation - Task Blueprint Creation
 
 ### Task Blueprint Creation - **Iterative Main Agent ↔ Task Blueprint Specialist**
 
@@ -111,7 +200,7 @@ If any required specification is missing, guide the user to complete their speci
 - **Context Bundle Manifest**: Required context files for Bundler, Security, and Validator agents
 - **Verification Context**: Testing and validation requirements for each task
 
-## Phase 5: Deliverable Creation & Validation
+## Phase 6: Deliverable Creation & Validation
 
 **Complete Deliverable Creation Process:**
 
