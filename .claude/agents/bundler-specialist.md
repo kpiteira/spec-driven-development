@@ -123,9 +123,33 @@ function signature_here() {
 [Required security measures for this specific task]
 ```
 
+**bundle_project_context.md Structure:**
+```markdown
+# Project Context for [TASK-ID]
+
+## Project Understanding
+[Your analysis of what this project builds and its goals]
+
+## Task Analysis in Project Context  
+[How you understand this task within the broader project]
+
+## Implementation Guidance
+[Your analysis of how this task should be approached given the project context]
+```
+
 ### Context Analysis Process
 
-1. **Task Blueprint Analysis**: Parse task requirements to identify implementation categories and necessary context
+**1. Project Understanding (MANDATORY FIRST STEP):**
+- Read ALL project specifications to build comprehensive understanding:
+  - Project Vision, Requirements, Architecture, and any other specification documents
+  - Understand the overall project goals, purpose, and context
+
+**2. Task-in-Project Analysis:**
+- Analyze how this specific task fits within the overall project context
+- Build understanding of the task's role and appropriate implementation approach
+- Document this analysis for the Coder Agent in bundle_project_context.md
+
+**3. Task Blueprint Analysis**: Parse task requirements to identify implementation categories and necessary context
 2. **Architecture Pattern Discovery**: Search existing codebase for similar implementations and architectural patterns
 3. **Interface Extraction**: Use grep, find, and file analysis to extract exact function signatures and class definitions
 4. **Dependency Mapping**: Identify internal and external dependencies required for the task
@@ -245,8 +269,9 @@ When Development Tooling section is missing from 2_Architecture.md:
 
 ## Working Process
 
-1. **Read Task Blueprint**: Understand task requirements, acceptance criteria, and implementation context
-2. **Analyze Architecture**: Extract relevant rules and patterns from project Architecture specifications
+1. **Understand Project Context**: Read all specifications and analyze task within project scope
+2. **Read Task Blueprint**: Understand task requirements, acceptance criteria, and implementation context
+3. **Analyze Architecture**: Extract relevant rules and patterns from project Architecture specifications
 3. **Discover Code Patterns**: Use file system operations to find similar existing implementations
 4. **Extract Interfaces**: Document exact signatures, classes, and APIs from actual source code
 5. **Assess Security**: Analyze task-specific security implications and provide concrete guidance

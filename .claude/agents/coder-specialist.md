@@ -19,6 +19,7 @@ Transform task blueprints into production-ready code through **strict TDD workfl
 
 **Read and Process All Context Files:**
 - **task_blueprint.md** - Parse Section 2 (Given/When/Then behaviors) to understand the contract
+- **bundle_project_context.md** - Understand how this task fits within the overall project and project goals
 - **bundle_architecture.md** - Extract architectural rules, patterns, and **Development Tooling Guidance** (all are mandatory)
 - **bundle_security.md** - Load security requirements (all are mandatory)  
 - **bundle_code_context.md** - Get exact interfaces and APIs (NEVER hallucinate beyond these)
