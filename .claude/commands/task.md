@@ -1,244 +1,201 @@
 ---
-description: "Initialize task bundle and prepare for SDD assembly line execution"
+description: "Orchestrate the SDD assembly line for efficient task implementation"
 argument-hint: "TASK-XXX"
 allowed-tools: ["Read", "Write", "LS", "Bash", "Task"]
+model: claude-sonnet-4-20250514
 ---
 
-# Task Command - SDD Assembly Line Entry Point
+# Task Command - SDD Assembly Line Orchestrator
 
-Execute the SDD assembly line workflow for a specified task. This command creates task bundles and coordinates the Bundler → Coder → Validator workflow with proper context isolation and state management.
+You orchestrate the SDD assembly line, coordinating specialized agents to transform task blueprints into implemented solutions with maximum context efficiency.
 
-## Task Execution Process
+## Core Principle: Division of Cognitive Labor
 
-### Phase 1: Input Validation & Bundle Creation
+The assembly line works through specialized agents:
+- **Bundler**: Reads ALL specs and researches the codebase (heavy context use)
+- **Coder**: Implements using Bundler's research (focused context use)
+- **Validator**: Verifies quality and commits if successful (systematic validation)
 
-1. **Validate Task ID Format (Security Critical)**
-   - Use strict regex validation: `^TASK-[0-9]+$`
-   - Reject any task ID with path traversal sequences (../../../etc/passwd)
-   - Check that task blueprint exists in `project_sdd_on_claude/tasks/TASK-XXX_*.md`
-   - Validate YAML frontmatter structure in task blueprint
-   - Exit immediately on validation failure with clear error message
+This division ensures the Coder's context is preserved for implementation, not wasted on research.
 
-2. **Validate Bundle Directory Boundaries**
-   - Ensure bundle path remains within `.task_bundles/` directory
-   - Use absolute path validation to prevent directory traversal
-   - Verify workspace permissions for bundle directory creation
-   - Reject any paths attempting to escape project boundaries
+## Your Orchestration Mission
 
-3. **Handle Existing Bundle Conflicts**
-   - Check if `.task_bundles/TASK-XXX/` already exists
-   - If exists, create timestamp-based backup: `.task_bundles/TASK-XXX-backup-YYYYMMDD-HHMMSS/`
-   - Move existing bundle to backup location atomically
-   - Report bundle preservation to user with backup location
+1. **Set up the workspace** for the task
+2. **Coordinate handoffs** between specialized agents
+3. **Ensure quality** at each stage
+4. **Report results** clearly to the user
 
-4. **Create Task Bundle Structure**
-   - Create `.task_bundles/TASK-XXX/` directory with appropriate permissions (750)
-   - Copy task blueprint to bundle directory as `task_blueprint.md` (permissions 644)
-   - Create initial `bundle_status.yaml` with atomic write operation:
-     - task_id: TASK-XXX
-     - status: "created" 
-     - created_at: ISO 8601 UTC timestamp
-     - workflow_phase: "initialization"
-     - bundle_path: relative path to bundle directory
-     - task_blueprint: "task_blueprint.md"
-     - context_files: {} (empty, will be populated by Bundler Agent)
-     - bundler_agent_completed: false
-     - coder_agent_completed: false
-     - last_updated: ISO 8601 UTC timestamp
+You are NOT implementing the task - you're ensuring the specialists can succeed.
 
-### Phase 2: Bundler Agent Invocation
+## Phase 1: Setup & Validation
 
-1. **Update Bundle Status to Bundling**
-   - Use Edit tool to update `$bundle_dir/bundle_status.yaml`
-   - Change status from "created" to "bundling"
-   - Update workflow_phase to "bundler_invocation"
-   - Add bundling_started_at timestamp
+### 1.1 Validate Task ID
+- Verify format matches `^TASK-[0-9]+$`
+- Check task blueprint exists: `project_sdd_on_claude/tasks/TASK-XXX_*.md`
+- Exit with clear error if invalid
 
-2. **Invoke Bundler Agent with Task Tool**
-   - Use Task tool with subagent_type "bundler-specialist"
-   - Provide comprehensive task context in prompt:
-     - Task Bundle directory path: $bundle_dir
-     - Task Blueprint location: task_blueprint.md
-     - Request creation of all 4 context files: bundle_architecture.md, bundle_security.md, bundle_code_context.md, bundle_dependencies.md
-     - Emphasize preventing hallucination through comprehensive context analysis
-   - Handle Task tool execution errors with detailed logging
+### 1.2 Prepare Workspace
+Create bundle directory: `.task_bundles/TASK-XXX/`
+- If exists: backup to `.task_bundles/TASK-XXX-backup-YYYYMMDD-HHMMSS/`
+- Copy task blueprint as `task_blueprint.md`
+- Initialize `bundle_status.yaml`:
+```yaml
+task_id: TASK-XXX
+status: "initialized"
+created_at: [UTC timestamp from: date -u +"%Y-%m-%dT%H:%M:%S.000Z"]
+```
 
-3. **Validate Bundle Context Completion**
-   - Use Read tool to verify all required context files were created
-   - Check that each file is non-empty and contains substantive content
-   - Validate bundle directory structure matches expected pattern
-   - Required files: bundle_architecture.md, bundle_code_context.md, bundle_security.md, bundle_dependencies.md
+## Phase 2: Bundler Agent (Research Phase)
 
-4. **Update Status to Ready for Coding**
-   - Use Edit tool to update bundle_status.yaml
-   - Change status to "ready_for_coding"
-   - Update workflow_phase to "bundle_complete"
-   - Add bundling_completed_at timestamp
-   - Set bundler_agent_completed: true
-   - Report successful bundle creation to user
+### 2.1 Invoke Bundler Specialist
 
-### Phase 3: Coder Agent Invocation
+Update status to "bundling", then invoke:
 
-1. **Validate Bundle Ready for Coding**
-   - Use Read tool to verify bundle_status.yaml shows status: "ready_for_coding"
-   - Confirm bundler_agent_completed: true in bundle status
-   - Validate all required context files exist and are non-empty
-   - Required files: bundle_architecture.md, bundle_security.md, bundle_code_context.md, bundle_dependencies.md, task_blueprint.md
+```
+Use Task tool with subagent_type "bundler-specialist"
 
-2. **Update Bundle Status to Coding**
-   - Use Edit tool to update `$bundle_dir/bundle_status.yaml`
-   - Change status from "ready_for_coding" to "coding"
-   - Update workflow_phase to "coder_invocation"
-   - Add coding_started_at timestamp (ISO 8601 UTC)
-   - Set coder_agent_completed: false
+CRITICAL PROMPT FOR BUNDLER:
+"Your mission: Research the codebase comprehensively so the Coder doesn't have to.
 
-3. **Invoke Coder Agent with Task Tool**
-   - Use Task tool with subagent_type "coder-specialist"
-   - Specify model: claude-opus-4-1-20250805 (per NFR-PERF-006)
-   - Provide comprehensive context in prompt:
-     - Task Bundle directory path: $bundle_dir
-     - Instruction: "Read task blueprint and all bundle_*.md context files"
-     - Request: "Implement TDD workflow following task contract in Section 2"
-     - Emphasis: "Generate failing tests first (red phase), then implement code that makes tests pass (green phase)"
-     - Security: "Follow all architectural rules and security guidance in bundle context"
-     - Output: "Place generated code according to project architectural conventions"
-   - Handle Task tool execution errors with detailed logging to coder_error.log
+Task Bundle Directory: .task_bundles/TASK-XXX
+Task Blueprint: task_blueprint.md
 
-4. **Validate Coder Implementation Results**
-   - Use Read tool to verify Coder Agent generated implementation artifacts
-   - Confirm TDD workflow: tests exist and are executable
-   - Verify initial test failure (red phase) followed by implementation success (green phase)
-   - Validate code placement follows architectural conventions from bundle_architecture.md
-   - Check security guidance implementation per bundle_security.md requirements
+Required Outputs:
+1. bundle_project_context.md - MOST CRITICAL - explains what type of deliverable this is
+2. bundle_architecture.md - relevant patterns with concrete examples
+3. bundle_code_context.md - exact interfaces to use (no hallucination)
+4. bundle_security.md - task-specific security requirements
+5. bundle_dependencies.md - available tools and libraries
 
-5. **Update Status to Ready for Validation**
-   - Use Edit tool to update bundle_status.yaml
-   - Change status to "ready_for_validation"
-   - Update workflow_phase to "coder_complete"
-   - Add coding_completed_at timestamp
-   - Set coder_agent_completed: true
-   - Report successful code generation to user
+Remember: You're reading everything so the Coder can focus purely on implementation.
+The Coder will trust your research completely - make it impossible for them to misunderstand."
+```
 
-### Phase 4: Validator Agent Invocation (Enhanced Validation)
+### 2.2 Validate Bundler Output
+Verify ALL required files exist and contain substance:
+- bundle_project_context.md (MUST explicitly state deliverable type)
+- bundle_architecture.md (MUST include concrete examples)
+- bundle_code_context.md (MUST have exact interfaces)
+- bundle_security.md (MUST be task-specific)
+- bundle_dependencies.md (MUST list what's available)
 
-1. **Validate Bundle Ready for Validation**
-   - Use Read tool to verify bundle_status.yaml shows status: "ready_for_validation"
-   - Confirm coder_agent_completed: true in bundle status
-   - Validate all required context files exist and are non-empty
-   - Required files: bundle_architecture.md, bundle_security.md, bundle_code_context.md, bundle_dependencies.md, task_blueprint.md
+If any missing or empty: STOP and report failure.
 
-2. **Update Bundle Status to Validating**
-   - Use Edit tool to update `$bundle_dir/bundle_status.yaml`
-   - Change status from "ready_for_validation" to "validation_started"
-   - Update workflow_phase to "validator_invocation"
-   - Add validation_started_at timestamp (ISO 8601 UTC)
-   - Set validator_agent_completed: false
+## Phase 3: Coder Agent (Implementation Phase)
 
-3. **Invoke Validator Agent with Task Tool**
-   - Use Task tool with subagent_type "validator-specialist"
-   - Specify model: claude-sonnet-4-20250514 (per NFR-PERF-005 for systematic tasks)
-   - Provide comprehensive context in prompt:
-     - Task Bundle directory path: $bundle_dir
-     - Instruction: "Read task blueprint and all bundle_*.md context files"
-     - Request: "Execute comprehensive validation workflow following TASK-013 contract"
-     - Components: "Run tests, linting, type checking, security scanning, and conditional git commit"
-     - Security: "Follow all security guidance from bundle_security.md"
-     - Output: "Generate validation artifacts and preserve bundle on failure"
-   - Handle Task tool execution errors with detailed logging to validator_error.log
+### 3.1 Invoke Coder Specialist
 
-4. **Validate Validation Results**
-   - Use Read tool to verify Validator Agent completed validation process
-   - Check validation artifacts: validation_results.json, validation_summary.md
-   - Verify git commit was created if all validation passed (commit SHA in bundle_status.yaml)
-   - Confirm validation failure handling if validation failed (preserved bundle with error details)
+Update status to "coding", then invoke:
 
-5. **Complete Task Based on Validation Results**
-   - **Success**: Update status to "completed", preserve bundle directory for review
-   - **Failure**: Status remains "validation_failed", bundle preserved with detailed error information
-   - **Note**: Bundle is always preserved to allow review of validation process and results
+```
+Use Task tool with subagent_type "coder-specialist"
 
-## Security & Quality Standards
+CRITICAL PROMPT FOR CODER:
+"Trust the bundle completely. Implement the solution. Never re-research.
 
-**Input Validation:**
-- Validate task ID format using secure regex patterns
-- Prevent path traversal attacks in all file operations
-- Sanitize all user inputs before processing
+Task Bundle Directory: .task_bundles/TASK-XXX
 
-**Bundle Management:**
-- Use atomic operations where possible
-- Maintain consistent filesystem state
-- Provide clear error messages and recovery guidance
+MANDATORY FIRST ACTION:
+Read bundle_project_context.md to understand what type of deliverable you're creating.
 
-**Agent Coordination:**
-- Ensure clean context isolation between agents
-- Pass only necessary, sanitized information to sub-agents
-- Maintain bundle status throughout workflow
+Then proceed with implementation:
+- For code: Follow TDD (Red-Green-Refactor)
+- For specs/docs: Follow format examples exactly
+- For configs: Copy patterns precisely
+- For commands: Write instructions, not code
 
-## Success Criteria
+The Bundler has already researched everything. Your job is pure implementation.
+Use ONLY interfaces documented in bundle_code_context.md.
+Follow ALL patterns from bundle_architecture.md.
+Trust the bundle. Implement the solution."
+```
 
-The command succeeds when:
+### 3.2 Validate Coder Output
+Based on deliverable type from bundle_project_context.md:
+- For code: Verify tests exist and pass
+- For docs: Verify format matches examples
+- For configs: Verify structure follows patterns
+- For commands: Verify it's instructions, not code
 
-1. Task bundle is created with correct structure and status tracking
-2. All agents (Bundler, Coder, Validator) complete successfully
-3. Implementation is generated according to task blueprint
-4. All validation checks pass (tests, linting, type checking, security scanning)
-5. Generated code is automatically committed to git repository
-6. Bundle is preserved with complete validation artifacts for review
-7. User receives clear confirmation with commit SHA and validation summary
+## Phase 4: Validator Agent (Quality Phase)
+
+### 4.1 Invoke Validator Specialist
+
+Update status to "validating", then invoke:
+
+```
+Use Task tool with subagent_type "validator-specialist"
+
+PROMPT FOR VALIDATOR:
+"Validate implementation quality and commit if successful.
+
+Task Bundle Directory: .task_bundles/TASK-XXX
+
+Validation Requirements:
+1. Verify contract fulfillment (all behaviors from task blueprint)
+2. Check architectural compliance (patterns from bundle)
+3. Validate security requirements (from bundle_security.md)
+4. Run quality checks appropriate to deliverable type
+5. If ALL pass: Create git commit with descriptive message
+6. If ANY fail: Document failures, preserve bundle for debugging
+
+Generate validation_summary.md with results."
+```
+
+### 4.2 Report Results
+Based on validation outcome:
+- Success: Report completion with commit SHA
+- Failure: Report specific failures with debugging guidance
+
+## Critical Success Factors
+
+### What Makes This Succeed
+1. **Clear handoffs** - Each agent knows exactly what they receive and produce
+2. **Trust the specialists** - Don't micromanage their implementation
+3. **Context efficiency** - Bundler reads everything, Coder implements
+4. **Deliverable awareness** - Understand what's being built before building it
+
+### What Makes This Fail
+1. **Vague prompts** - Generic instructions instead of specific guidance
+2. **Skipping validation** - Not checking outputs before proceeding
+3. **Context waste** - Agents re-researching what's already known
+4. **Format confusion** - Not understanding deliverable type
 
 ## Error Handling
 
-**Input Validation Failures:**
-- **Invalid task ID format** → Validate using regex `^TASK-[0-9]+$`, reject path traversal attempts
-- **Missing task blueprint** → Check `project_sdd_on_claude/tasks/TASK-XXX_*.md` exists
-- **Bundle directory conflicts** → Preserve existing bundle with timestamp backup before creating new
+Keep it simple and actionable:
 
-**Bundler Agent Invocation Failures:**
+### Bundler Failures
+- Missing context files → Report which files missing
+- Empty files → Report which files need content
+- Response: "Bundler failed to create comprehensive context. Review task blueprint clarity."
 
-- **Task tool execution errors** → Log full error details to `$bundle_dir/bundler_error.log`
-- **Bundler agent timeout** → Update bundle status to "bundling_failed", preserve bundle for debugging
-- **Context creation failures** → Validate each required context file, provide specific missing file details
-- **Bundle validation errors** → Update status to "validation_failed", preserve partial bundle
+### Coder Failures
+- Tests don't pass → Preserve test output
+- Wrong format → Show expected vs actual
+- Response: "Implementation doesn't match requirements. Check bundle context completeness."
 
-**Coder Agent Invocation Failures:**
+### Validator Failures
+- Quality issues → List specific failures
+- Can't commit → Preserve validation results
+- Response: "Validation failed. See validation_summary.md for details."
 
-- **Task tool execution errors** → Log full error details to `$bundle_dir/coder_error.log`
-- **Coder agent timeout** → Update bundle status to "coding_failed", preserve bundle for debugging
-- **Code generation failures** → Validate generated artifacts, provide specific missing implementation details
-- **TDD workflow violations** → Check test generation and implementation sequence, report specific TDD failures
-- **Security validation failures** → Verify security guidance compliance, report specific security violations
-- **Architectural compliance failures** → Check code placement and conventions, report specific architectural violations
+## Status Management
 
-**Validator Agent Invocation Failures:**
+Keep status simple and meaningful:
+- "initialized" → Setup complete
+- "bundling" → Bundler working
+- "coding" → Coder working
+- "validating" → Validator working
+- "completed" → Success with commit
+- "failed" → Check bundle for details
 
-- **Task tool execution errors** → Log full error details to `$bundle_dir/validator_error.log`
-- **Validator agent timeout** → Update bundle status to "validation_failed", preserve bundle for debugging  
-- **Test execution failures** → Preserve detailed test results, categorize as "test" failure for remediation
-- **Static analysis failures** → Preserve linting/type checking results, categorize as "lint"/"type" for remediation
-- **Security scanning failures** → Preserve security scan results, categorize as "security" failure for remediation
-- **Git commit failures** → Preserve validation results but prevent commit, maintain clean repository state
-- **Validation system errors** → Log system errors, preserve bundle with diagnostic information
+## Remember
 
-**Security Error Handling:**
-- **Path traversal attempts** → Reject immediately with security error message
-- **Bundle directory boundary violations** → Validate all paths remain within `.task_bundles/`
-- **Context sanitization failures** → Log security issues, update bundle status to "security_failed"
+You're the orchestrator, not the implementer. Your job is to:
+1. Set up the workspace
+2. Give specialists clear, specific prompts
+3. Validate outputs before proceeding
+4. Report results clearly
 
-**Error Recovery Patterns:**
-- **Preserve bundle state on all failures** → Never delete failed bundles, add failure timestamp
-- **Atomic status updates** → Use temporary files for status updates, move atomically
-- **Detailed error logging** → Write error details to bundle directory for troubleshooting
-- **Clean error messages** → Sanitize error output to prevent information disclosure
-- **Actionable guidance** → Provide specific next steps for each failure mode
-
-**Bundle Status Error States:**
-
-- "bundling_failed" → Bundler agent execution failed
-- "coding_failed" → Coder agent execution failed  
-- "validation_failed" → Validator agent execution failed or validation checks failed
-- "security_failed" → Security validation errors
-- "error_recovery" → General error state for manual inspection
-
-**Bundle Status Success States:**
-
-- "completed" → Task completed successfully with full validation and git commit
+Trust the specialists to do their jobs. Give them what they need to succeed.
