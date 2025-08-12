@@ -254,3 +254,82 @@ The process is complete when you have created BOTH:
 2. **Individual task blueprint files** for every TASK-XXX identified in the milestone plan
 
 Both deliverable sets must be template-compliant, internally consistent, and ready for execution by subsequent milestone workflows. The milestone must be validated as executable and complete before declaring success.
+
+## Phase 7: Planning Retrospective (Immediate Learning Capture)
+
+**CRITICAL**: Conduct comprehensive planning retrospective immediately after milestone planning completion to capture fresh insights for future planning sessions.
+
+**Retrospective Focus**: Analyze the planning process itself, not the implementation (that comes after `/milestone` execution).
+
+### Step 1: Agent Self-Introspection and Issue Analysis (FIRST)
+
+**Main Agent Self-Reflection**: Before engaging the Human Architect, perform comprehensive self-analysis:
+
+1. **Process Issues Encountered:**
+   - Which phases of the planning process caused confusion or required multiple iterations?
+   - Where did agent-to-specialist handoffs encounter problems?
+   - What requirements validation issues were discovered?
+   - Which strategic questions from specialists were unclear or unhelpful?
+
+2. **Specialist Performance Analysis:**
+   - Did the Milestone Planning Specialist struggle with any aspects of roadmap analysis or task breakdown?
+   - Were there gaps in the Task Blueprint Specialist's understanding of implementation requirements?
+   - What assumptions were made that later proved incorrect?
+   - Which template sections caused confusion or required clarification?
+
+3. **Communication and Context Issues:**
+   - Where did persona confusion occur (agents vs humans, parsing vs comprehension)?
+   - Which instructions were misinterpreted by specialists?
+   - What context handoffs lost important information?
+   - Where did requirement references fail validation?
+
+4. **Complexity and Scope Issues:**
+   - Where did over-engineering creep into the planning process?
+   - Which features were added beyond roadmap scope?
+   - What parallel execution complexity was considered and rejected/accepted?
+   - Where did simplicity-first principles get violated?
+
+### Step 2: Present Agent Analysis to Human Architect
+
+**Structured Presentation**: Share the self-introspection findings with the Human Architect:
+- "Here's what I observed about issues during our planning process..."
+- "The specialists encountered these specific challenges..."
+- "I noticed these patterns that might need attention in future planning..."
+
+### Step 3: Human Architect Feedback Collection (SECOND)
+
+Ask the Human Architect to reflect on and add to the agent analysis:
+
+1. **Planning Process Effectiveness:**
+   - Which parts of the planning process were most/least valuable?
+   - Where did we spend too much time or get stuck?
+   - Did the iterative refinement approach work well?
+   - What would make future planning sessions more efficient?
+
+2. **Agent and Specialist Performance:**
+   - Were the strategic questions from specialists helpful?
+   - Did task breakdowns seem logical and implementable?
+   - What would you want different from agents/specialists next time?
+   - Were there human/AI collaboration issues to address?
+
+3. **Quality and Outcome Assessment:**
+   - Did we achieve the right level of detail without over-engineering?
+   - Are there patterns we should document for future reference?
+   - What assumptions or decisions should be validated during implementation?
+   - Were the deliverables (milestone plan + task blueprints) what you expected?
+
+### Step 4: Create Comprehensive Learning Document
+
+Create detailed retrospective file: `specs/retrospectives/PLANNING_M[X]_[Date].md` combining agent insights with human feedback:
+
+**Required Sections:**
+- **Planning Duration**: Actual time spent vs. expectations with breakdown by phase
+- **Agent Self-Analysis**: Specific issues agents encountered and patterns identified
+- **Process Issues**: What didn't work, confusion points, inefficiencies from both perspectives
+- **What Worked Well**: Successful techniques, decisions, approaches that should be repeated
+- **Human-AI Collaboration**: Communication issues, handoff problems, expectation mismatches
+- **Scope and Complexity Management**: Over-engineering incidents, requirement creep, simplicity violations
+- **Recommendations**: Concrete, actionable suggestions for improving future milestone planning
+- **Strategic Insights**: High-level insights about project complexity, scope, or methodology improvements
+
+**Integration**: These learnings feed directly into Phase 2.6 of future `/plan_milestone` executions and inform SDD methodology evolution.

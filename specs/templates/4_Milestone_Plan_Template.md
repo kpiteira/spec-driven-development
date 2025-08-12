@@ -6,9 +6,19 @@ description: "Template for detailed milestone execution planning"
 
 # Milestone Plan: [Milestone Name, e.g., M1 - Minimum Viable Product]
 
-**Purpose of this document:** This document provides a detailed, tactical plan for executing a single milestone from the Project Roadmap. It is the primary input for the `Supervisor Agent`, containing the precise sequence of work and the quality gates required to consider the milestone complete.
+**Purpose of this document:** This document provides a detailed, tactical plan for executing a single milestone from the Project Roadmap. It enables Claude Code agents to read and understand milestone execution requirements, containing the precise sequence of work and quality gates required for milestone completion. This plan will be implemented by the `/milestone` command using sequential task execution.
 
 **Link to Roadmap:** `[Link to Roadmap.md]`
+
+## Planning Guidelines for Milestone Planning Specialists
+
+**Requirements Validation:** Before creating this milestone plan, verify all requirement references against the actual requirements document (`1_Product_Requirements.md`). Use only existing REQ-XXX, NFR-XXX identifiers - never invent new requirement IDs.
+
+**Scope Boundaries:** This milestone must deliver only the features specified in the roadmap milestone. Any additions must be explicitly justified against higher-level specifications and approved by the Human Architect.
+
+**Simplicity First:** Start with sequential task execution unless parallel execution provides clear value. Focus on the simplest implementation approach that delivers the roadmap value.
+
+**Generic Capability:** Use examples that demonstrate this plan can be executed by the `/milestone [name]` command for any milestone, not just specific milestone names.
 
 ---
 

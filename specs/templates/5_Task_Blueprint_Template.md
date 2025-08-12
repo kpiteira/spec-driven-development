@@ -11,6 +11,16 @@ status: "pending"
 branch: "feature/TASK-XXX-[short-description]"
 ---
 
+## Implementation Context for Claude Code Agents
+
+**Agent Guidance:** This task will be implemented by Claude Code agents using natural language understanding capabilities. When you read instructions to "parse files" or "extract information," interpret this as reading and understanding documents using your natural language comprehension, not building programmatic parsers or extraction systems.
+
+**Process Flow:** This task will be executed through the SDD assembly line: Bundler Specialist (context research) → Coder Specialist (TDD implementation) → Validator Specialist (comprehensive testing). Each specialist uses document comprehension to understand requirements and context.
+
+**Architecture Compliance:** All implementation must follow the project's architecture specifications as understood through document analysis, not through algorithmic rule enforcement.
+
+---
+
 ## 1. Task Overview & Goal
 
 **What it is:** A clear, narrative description of the task's purpose, its place within the larger feature slice, and why it's important. This provides the essential "why" for the agents.
