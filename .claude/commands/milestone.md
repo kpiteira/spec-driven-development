@@ -83,7 +83,7 @@ Create milestone bundle directory for state management:
 milestone_bundle_dir=".milestone_bundles/${milestone_name}"
 mkdir -p "$milestone_bundle_dir"
 
-# Create milestone execution status
+# Create milestone execution status with enhanced error handling fields
 cat > "$milestone_bundle_dir/milestone_status.yaml" << EOF
 milestone_name: ${milestone_name}
 status: "executing"
@@ -93,14 +93,22 @@ total_tasks: ${task_count}
 current_task_index: 0
 completed_tasks: []
 failed_task: null
+last_updated: $(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 execution_log: []
 EOF
+
+# Initialize tracking arrays for error handling
+completed_tasks=()
+current_index=0
 ```
 
 ### 2.2 Execute Tasks Sequentially Using Proven Infrastructure
 For each identified TASK-XXX in order:
 
 ```bash
+# Increment current task index for proper tracking
+current_index=$((current_index + 1))
+
 # Progress reporting before execution
 echo "Starting ${task_id} [${current_index}/${total_tasks}]"
 
@@ -109,15 +117,25 @@ echo "Starting ${task_id} [${current_index}/${total_tasks}]"
 /task ${task_id}
 task_exit_code=$?
 
-# Handle execution result
+# Handle execution result with comprehensive error handling
 if [[ $task_exit_code -eq 0 ]]; then
     echo "Completed ${task_id} [${current_index}/${total_tasks}]"
+    
     # Update milestone status with completed task
+    completed_tasks+=("\"${task_id}\"")
+    
+    # Update milestone status atomically
+    update_milestone_status_success "${milestone_bundle_dir}/milestone_status.yaml" "$task_id" "$current_index"
+    
     # Continue to next task
 else
     echo "FAILED: Task ${task_id} failed during milestone execution [${current_index}/${total_tasks}]"
     echo "The specific task that failed: ${task_id}"
-    # Update milestone status with failure
+    echo "Exit code: ${task_exit_code}"
+    
+    # Comprehensive error handling and context preservation
+    handle_task_failure "$milestone_bundle_dir" "$task_id" "$current_index" "$total_tasks" "$task_exit_code"
+    
     # STOP execution immediately - no subsequent tasks
     exit 1
 fi
@@ -255,6 +273,371 @@ Design milestone state to support future resume functionality:
 completed_tasks: ["TASK-005", "TASK-006"]  # Tasks that completed successfully
 current_task_index: 2                       # Next task to execute
 resume_supported: true                      # Flag for future enhancement
+```
+
+## Enhanced Error Handling Functions
+
+### Error Handling and Context Preservation Functions
+```bash
+# Function to handle task failures with comprehensive error processing
+handle_task_failure() {
+    local milestone_bundle_dir="$1"
+    local failed_task_id="$2" 
+    local current_index="$3"
+    local total_tasks="$4"
+    local task_exit_code="$5"
+    
+    # Validate bundle directory path for security
+    validate_workspace_path "$milestone_bundle_dir"
+    
+    # Get current timestamp for failure recording
+    local failure_time=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+    
+    # Update milestone status to failed with comprehensive context
+    update_milestone_status_failure "${milestone_bundle_dir}/milestone_status.yaml" "$failed_task_id" "$current_index" "$failure_time"
+    
+    # Create detailed failure context for debugging
+    create_failure_context "$milestone_bundle_dir" "$failed_task_id" "$current_index" "$total_tasks" "$task_exit_code" "$failure_time"
+    
+    # Generate recovery guidance based on failure type
+    generate_recovery_guidance "$milestone_bundle_dir" "$failed_task_id" "$task_exit_code"
+    
+    # Log execution state for visibility
+    log_execution_state "$milestone_bundle_dir" "$failed_task_id" "$current_index" "$total_tasks"
+}
+
+# Function to update milestone status on success
+update_milestone_status_success() {
+    local status_file="$1"
+    local completed_task="$2"
+    local new_index="$3"
+    
+    # Validate inputs for security
+    if [[ ! -f "$status_file" ]]; then
+        echo "Error: Status file not found: $status_file"
+        return 1
+    fi
+    
+    # Validate workspace path for security
+    validate_workspace_path "$status_file"
+    
+    # Read current status to preserve data with error handling
+    local milestone_name=$(grep "^milestone_name:" "$status_file" 2>/dev/null | sed 's/milestone_name: //' | tr -d '"' || echo "unknown")
+    local started_at=$(grep "^started_at:" "$status_file" 2>/dev/null | sed 's/started_at: //' | tr -d '"' || echo "unknown")
+    local milestone_doc=$(grep "^milestone_plan_document:" "$status_file" 2>/dev/null | sed 's/milestone_plan_document: //' | tr -d '"' || echo "unknown")
+    local total_tasks=$(grep "^total_tasks:" "$status_file" 2>/dev/null | sed 's/total_tasks: //' || echo "0")
+    
+    # Update status atomically with error handling
+    if cat > "${status_file}.tmp" << EOF
+milestone_name: "${milestone_name}"
+status: "executing"
+started_at: "${started_at}"
+milestone_plan_document: "${milestone_doc}"
+total_tasks: ${total_tasks}
+current_task_index: ${new_index}
+completed_tasks: [$(IFS=','; echo "${completed_tasks[*]}")] 
+failed_task: null
+last_updated: "$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")"
+execution_log: []
+EOF
+    then
+        mv "${status_file}.tmp" "$status_file"
+    else
+        echo "Error: Failed to update milestone status"
+        rm -f "${status_file}.tmp" 2>/dev/null
+        return 1
+    fi
+}
+
+# Function to update milestone status on failure
+update_milestone_status_failure() {
+    local status_file="$1"
+    local failed_task="$2"
+    local current_index="$3"
+    local failure_time="$4"
+    
+    # Validate inputs for security
+    if [[ ! -f "$status_file" ]]; then
+        echo "Error: Status file not found: $status_file"
+        return 1
+    fi
+    
+    # Validate workspace path for security
+    validate_workspace_path "$status_file"
+    
+    # Read current status to preserve data with error handling
+    local milestone_name=$(grep "^milestone_name:" "$status_file" 2>/dev/null | sed 's/milestone_name: //' | tr -d '"' || echo "unknown")
+    local started_at=$(grep "^started_at:" "$status_file" 2>/dev/null | sed 's/started_at: //' | tr -d '"' || echo "unknown")
+    local milestone_doc=$(grep "^milestone_plan_document:" "$status_file" 2>/dev/null | sed 's/milestone_plan_document: //' | tr -d '"' || echo "unknown")
+    local total_tasks=$(grep "^total_tasks:" "$status_file" 2>/dev/null | sed 's/total_tasks: //' || echo "0")
+    
+    # Update status atomically with failure information and error handling
+    if cat > "${status_file}.tmp" << EOF
+milestone_name: "${milestone_name}"
+status: "failed"
+started_at: "${started_at}"
+failed_at: "${failure_time}"
+milestone_plan_document: "${milestone_doc}"
+total_tasks: ${total_tasks}
+current_task_index: ${current_index}
+completed_tasks: [$(IFS=','; echo "${completed_tasks[*]}")] 
+failed_task: "${failed_task}"
+last_updated: "${failure_time}"
+execution_log: []
+EOF
+    then
+        mv "${status_file}.tmp" "$status_file"
+    else
+        echo "Error: Failed to update milestone status with failure information"
+        rm -f "${status_file}.tmp" 2>/dev/null
+        return 1
+    fi
+}
+
+# Function to create detailed failure context for debugging
+create_failure_context() {
+    local milestone_bundle_dir="$1"
+    local failed_task_id="$2"
+    local current_index="$3"
+    local total_tasks="$4"
+    local task_exit_code="$5"
+    local failure_time="$6"
+    
+    # Validate inputs for security
+    if [[ ! -d "$milestone_bundle_dir" ]]; then
+        echo "Error: Milestone bundle directory not found: $milestone_bundle_dir"
+        return 1
+    fi
+    
+    # Validate workspace path for security
+    validate_workspace_path "$milestone_bundle_dir"
+    
+    # Sanitize error information following security patterns
+    local safe_milestone_dir=$(basename "$milestone_bundle_dir" 2>/dev/null || echo "unknown")
+    local safe_failed_task_id=$(echo "$failed_task_id" | sed 's/[^A-Za-z0-9-]//g')
+    
+    # Read milestone name safely for context
+    local milestone_name="unknown"
+    if [[ -f "$milestone_bundle_dir/milestone_status.yaml" ]]; then
+        milestone_name=$(grep "^milestone_name:" "$milestone_bundle_dir/milestone_status.yaml" 2>/dev/null | sed 's/milestone_name: //' | tr -d '"' || echo "unknown")
+    fi
+    
+    # Create comprehensive failure context with error handling
+    if cat > "$milestone_bundle_dir/failure_context.md" << EOF
+# Milestone Execution Failure
+
+**Failed Task**: ${failed_task_id}
+**Task Position**: ${current_index}/${total_tasks}
+**Failure Time**: ${failure_time}
+**Exit Code**: ${task_exit_code}
+
+## Execution State Summary
+
+### Completed Tasks
+$(if [[ ${#completed_tasks[@]} -gt 0 ]]; then
+    for task in "${completed_tasks[@]}"; do
+        echo "- ${task//\"/}"
+    done
+else
+    echo "- None"
+fi)
+
+### Failed Task Details
+- **Task ID**: ${failed_task_id}
+- **Position in Sequence**: Task ${current_index} of ${total_tasks}
+- **Exit Code**: ${task_exit_code}
+
+### Remaining Tasks
+$(echo "Tasks ${current_index}/${total_tasks} through ${total_tasks}/${total_tasks} were not attempted due to failure")
+
+## Debugging Information
+
+### Task Bundle Location
+- **Failed Task Bundle**: .task_bundles/${failed_task_id}/
+- **Milestone Bundle**: ${safe_milestone_dir}/
+- **Status Files**: milestone_status.yaml, failure_context.md
+
+### Context Preservation
+All task execution context has been preserved for debugging:
+- Task bundle directory contains complete execution context
+- Milestone state preserved for potential resume capability
+- No automatic cleanup performed to maintain debugging information
+
+## Recovery Instructions
+
+### Immediate Next Steps
+1. **Investigate the failure**:
+   - Review task bundle: .task_bundles/${failed_task_id}/
+   - Check bundle_status.yaml for specific failure details
+   - Review validation results if available
+
+2. **Identify root cause**:
+   - Check if task blueprint needs clarification
+   - Verify if codebase issues need resolution
+   - Determine if architectural constraints were violated
+
+3. **Choose recovery approach**:
+   - **Fix and Retry**: Resolve underlying issue and re-run milestone
+   - **Task Debugging**: Use /task ${failed_task_id} to debug specific task
+   - **Milestone Review**: Review milestone plan for dependencies or sequencing issues
+
+### Recovery Commands
+\`\`\`bash
+# To retry after fixing issues:
+/milestone ${milestone_name//\"/}
+
+# To debug the specific failed task:
+/task ${failed_task_id}
+
+# To review task details:
+cat .task_bundles/${failed_task_id}/bundle_status.yaml
+\`\`\`
+
+### Important Notes
+- **No Partial Completion**: Milestone execution stops completely on any task failure
+- **State Preservation**: All context preserved for debugging and potential resume
+- **Sequential Dependency**: Later tasks may depend on earlier task completion
+- **Full Restart**: Current implementation requires full milestone restart after fixes
+EOF
+    then
+        echo "Failure context created successfully: $milestone_bundle_dir/failure_context.md"
+    else
+        echo "Error: Failed to create failure context file"
+        return 1
+    fi
+}
+
+# Function to generate tailored recovery guidance
+generate_recovery_guidance() {
+    local milestone_bundle_dir="$1"
+    local failed_task_id="$2"
+    local task_exit_code="$3"
+    
+    # Validate inputs for security
+    if [[ ! -d "$milestone_bundle_dir" ]]; then
+        echo "Error: Milestone bundle directory not found: $milestone_bundle_dir"
+        return 1
+    fi
+    
+    # Validate workspace path for security
+    validate_workspace_path "$milestone_bundle_dir"
+    
+    # Sanitize task ID for security
+    local safe_failed_task_id=$(echo "$failed_task_id" | sed 's/[^A-Za-z0-9-]//g')
+    
+    # Generate guidance based on exit code patterns
+    local guidance_type="general"
+    local specific_guidance=""
+    
+    case $task_exit_code in
+        1)
+            guidance_type="validation_failure"
+            specific_guidance="Task likely failed during validation phase. Check validation results and code quality."
+            ;;
+        2)
+            guidance_type="compilation_failure"
+            specific_guidance="Task likely failed during compilation or build. Check syntax and dependencies."
+            ;;
+        126)
+            guidance_type="permission_failure"
+            specific_guidance="Permission denied. Check file permissions and workspace access."
+            ;;
+        127)
+            guidance_type="command_not_found"
+            specific_guidance="Command or tool not found. Verify task dependencies and tool availability."
+            ;;
+        *)
+            guidance_type="general"
+            specific_guidance="General task failure. Review task bundle for specific error details."
+            ;;
+    esac
+    
+    # Append specific guidance to failure context with error handling
+    if [[ -f "$milestone_bundle_dir/failure_context.md" ]]; then
+        if cat >> "$milestone_bundle_dir/failure_context.md" << EOF
+
+## Failure Analysis
+
+**Exit Code**: ${task_exit_code}
+**Failure Type**: ${guidance_type}
+**Specific Guidance**: ${specific_guidance}
+
+### Recommended Investigation Steps
+1. Check task bundle status: .task_bundles/${safe_failed_task_id}/bundle_status.yaml
+2. Review any validation results or error logs in task bundle
+3. Verify task blueprint clarity and completeness
+4. Check for dependency issues or missing prerequisites
+EOF
+        then
+            echo "Recovery guidance appended successfully"
+        else
+            echo "Error: Failed to append recovery guidance"
+            return 1
+        fi
+    else
+        echo "Error: Failure context file not found for recovery guidance"
+        return 1
+    fi
+}
+
+# Function to log execution state for visibility
+log_execution_state() {
+    local milestone_bundle_dir="$1"
+    local failed_task_id="$2"
+    local current_index="$3"
+    local total_tasks="$4"
+    
+    # Validate inputs for security
+    if [[ ! -d "$milestone_bundle_dir" ]]; then
+        echo "Error: Milestone bundle directory not found: $milestone_bundle_dir"
+        return 1
+    fi
+    
+    # Validate workspace path for security
+    validate_workspace_path "$milestone_bundle_dir"
+    
+    # Sanitize task ID for security
+    local safe_failed_task_id=$(echo "$failed_task_id" | sed 's/[^A-Za-z0-9-]//g')
+    
+    # Get start time safely
+    local start_time="unknown"
+    if [[ -f "$milestone_bundle_dir/milestone_status.yaml" ]]; then
+        start_time=$(grep "^started_at:" "$milestone_bundle_dir/milestone_status.yaml" 2>/dev/null | sed 's/started_at: //' | tr -d '"' || echo "unknown")
+    fi
+    
+    # Create execution log for detailed tracking with error handling
+    if cat > "$milestone_bundle_dir/execution_log.txt" << EOF
+Milestone Execution Log
+======================
+
+Execution Summary:
+- Started: ${start_time}
+- Failed: $(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+- Progress: ${current_index}/${total_tasks} tasks attempted
+
+Completed Tasks (${#completed_tasks[@]}):
+$(if [[ ${#completed_tasks[@]} -gt 0 ]]; then
+    for i in "${!completed_tasks[@]}"; do
+        echo "$((i+1)). ${completed_tasks[i]//\"/} - COMPLETED"
+    done
+else
+    echo "None"
+fi)
+
+Failed Task:
+${current_index}. ${safe_failed_task_id} - FAILED
+
+Remaining Tasks (not attempted):
+$(echo "Tasks $((current_index+1)) through ${total_tasks} were not attempted due to failure")
+
+EOF
+    then
+        echo "Execution log created successfully: $milestone_bundle_dir/execution_log.txt"
+    else
+        echo "Error: Failed to create execution log"
+        return 1
+    fi
+}
 ```
 
 ## Success Criteria Validation
