@@ -104,6 +104,8 @@ Then proceed with implementation:
 - For configs: Copy patterns precisely
 - For commands: Write instructions, not code
 
+Create an implementation manifest documenting what you built."
+
 The Bundler has already researched everything. Your job is pure implementation.
 Use ONLY interfaces documented in bundle_code_context.md.
 Follow ALL patterns from bundle_architecture.md.
@@ -132,12 +134,13 @@ PROMPT FOR VALIDATOR:
 Task Bundle Directory: .task_bundles/TASK-XXX
 
 Validation Requirements:
-1. Verify contract fulfillment (all behaviors from task blueprint)
-2. Check architectural compliance (patterns from bundle)
-3. Validate security requirements (from bundle_security.md)
-4. Run quality checks appropriate to deliverable type
-5. If ALL pass: Create git commit with descriptive message
-6. If ANY fail: Document failures, preserve bundle for debugging
+1. Discover what was actually implemented (read manifest, check git status)
+2. Verify contract fulfillment (all behaviors from task blueprint)
+3. Check architectural compliance (patterns from bundle)
+4. Validate security requirements (from bundle_security.md)
+5. Run quality checks appropriate to deliverable type
+6. If ALL pass: Create verified git commit with accurate file staging
+7. If ANY fail: Document failures, preserve bundle for debugging
 
 Generate validation_summary.md with results."
 ```

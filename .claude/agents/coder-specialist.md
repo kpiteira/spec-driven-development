@@ -136,19 +136,60 @@ Before marking complete, verify:
    - All tests execute successfully
    - Test output captured with Bash tool
 
-## Phase 5: Update Bundle Status
+## Phase 5: Create Implementation Manifest (MANDATORY)
+
+### Create implementation_manifest.json
+Before updating bundle status, create a complete implementation manifest:
+
+```json
+{
+  "task_id": "[TASK-XXX from bundle]",
+  "implementation_timestamp": "[UTC timestamp]",
+  "implementation_type": "[command_enhancement|specification_update|new_feature|bug_fix]",
+  "files_modified": [
+    {
+      "path": "[relative path to modified file]",
+      "type": "[modified|created|deleted]",
+      "lines_added": 123,
+      "lines_removed": 45,
+      "purpose": "[Brief description of what changed]"
+    }
+  ],
+  "tests_created": [
+    {
+      "path": "[path to test file]",
+      "type": "[unit|integration|behavioral]",
+      "purpose": "[What this test validates]"
+    }
+  ],
+  "validation_requirements": {
+    "test_execution": true,
+    "git_commit": true,
+    "linting": false,
+    "type_checking": false,
+    "security_scan": true
+  },
+  "coder_verification": {
+    "implementation_complete": true,
+    "tests_passing": true,
+    "ready_for_validation": true,
+    "known_issues": []
+  }
+}
+```
+
+**Critical**: This manifest tells the Validator Agent exactly what you implemented, preventing validation failures due to false assumptions.
+
+## Phase 6: Update Bundle Status
 
 ### Update bundle_status.yaml
-Only after ALL validation passes:
+Only after manifest creation and ALL validation passes:
 ```yaml
 status: "ready_for_validation"
 workflow_phase: "coder_complete"
 coding_completed_at: [actual UTC timestamp from: date -u +"%Y-%m-%dT%H:%M:%S.000Z"]
 coder_agent_completed: true
 ```
-
-### Document What You Created
-List all files created/modified with their purpose
 
 ## Critical Principles
 

@@ -1,0 +1,40 @@
+{
+  "task_id": "TASK-XXX",
+  "implementation_timestamp": "2025-01-12T18:45:23.000Z",
+  "implementation_type": "command_enhancement|specification_update|new_feature|bug_fix",
+  "files_modified": [
+    {
+      "path": "relative/path/to/file.ext",
+      "type": "modified|created|deleted",
+      "lines_added": 123,
+      "lines_removed": 45,
+      "purpose": "Brief description of changes"
+    }
+  ],
+  "tests_created": [
+    {
+      "path": "tests/test-task-xxx-*.sh",
+      "type": "unit|integration|behavioral",
+      "purpose": "What this test validates"
+    }
+  ],
+  "validation_requirements": {
+    "test_execution": true,
+    "git_commit": true,
+    "linting": false,
+    "type_checking": false,
+    "security_scan": true
+  },
+  "special_instructions": {
+    "commit_message_prefix": "TASK-XXX: Brief description",
+    "validation_approach": "Description of how to validate this implementation",
+    "breaking_changes": false,
+    "requires_restart": false
+  },
+  "coder_verification": {
+    "implementation_complete": true,
+    "tests_passing": true,
+    "ready_for_validation": true,
+    "known_issues": []
+  }
+}
