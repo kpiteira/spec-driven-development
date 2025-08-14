@@ -42,9 +42,9 @@ This document outlines the strategic, milestone-based plan for developing the SD
 - **Hooks & Notifications:**
   - Integrate validation results into notifications (pass/fail).
 
-## Milestone 4: Autonomous Milestone Execution
+## Milestone 4: Basic Milestone Execution
 
-**Goal:** To scale the perfected assembly line by enabling the autonomous execution of an entire milestone.
+**Goal:** To scale the perfected assembly line by enabling the basic autonomous execution of an entire milestone.
 
 ### Requirements Addressed in this Milestone
 
@@ -53,50 +53,108 @@ This document outlines the strategic, milestone-based plan for developing the SD
 - **User Stories Fulfilled:**
   - "As a Human Architect, I want to launch the execution of an entire milestone..."
 
-## Milestone 5: Brownfield & Advanced Features
+## Milestone 5: Enhanced Milestone Features
 
-**Goal:** To expand the system's capabilities to handle existing projects and more complex scenarios.
+**Goal:** To improve the milestone execution experience with resume capability and status reporting.
+
+### Requirements Addressed in this Milestone
+
+- **Enhanced `/milestone` Command:**
+  - Resume capability: Skip tasks that are already completed
+  - Status reporting: Integration with hook system for milestone progress notifications
+- **User Stories Fulfilled:**
+  - "As a Human Architect, I want to resume milestone execution after interruptions..."
+  - "As a Human Architect, I want to receive notifications about milestone progress..."
+
+## Milestone 6: Brownfield Project Support
+
+**Goal:** To enable the SDD system to work with existing codebases and projects.
 
 ### Requirements Addressed in this Milestone
 
 - **Commands:**
   - `/init_brownfield`: Implements the discovery workflow for existing codebases.
-- **Sub-Agents:**
-  - `Bundler` (Full version): Extend the Bundler to analyze third-party libraries and external documentation.
+- **Enhanced Bundler:**
+  - Analyze existing project structure and conventions
+  - Discover existing patterns and architectural decisions
+  - Understand existing testing and build processes
 - **User Stories Fulfilled:**
   - "As a Human Architect, I want to onboard an existing project..."
+  - "As a Human Architect, I want to understand existing codebase patterns..."
 
-## Milestone 6: Intelligent Defaults & Pattern Learning (Future)
+## Milestone 7: Advanced Bundler Capabilities
 
-**Goal:** To evolve the SDD system from comprehensive questioning to intelligent pattern recognition and preference validation, reducing cognitive load through learned defaults.
+**Goal:** To extend the Bundler to analyze third-party libraries and external documentation for comprehensive context.
 
-### Vision for this Milestone
+### Requirements Addressed in this Milestone
 
-- **User Preference Storage:** Store cross-project patterns in `~/.sdd/preferences/` (user-level patterns)
-- **Pattern Recognition:** Analyze past project choices to suggest intelligent defaults
-- **Preference Validation:** Transform "What do you want?" into "Continue using X like last time?"
-- **Cross-Project Intelligence:** Learn technology stack patterns, quality approaches, UX patterns
+- **Enhanced Bundler Features:**
+  - Third-party library analysis and documentation parsing
+  - External API documentation integration
+  - Complex dependency analysis and compatibility checking
+  - Framework-specific pattern recognition
+- **User Stories Fulfilled:**
+  - "As a Human Architect, I want comprehensive analysis of external dependencies..."
+  - "As a Human Architect, I want framework-specific guidance and patterns..."
 
-### Example User Experience Evolution
+## Milestone 8: Advanced Features
 
-**Before (Current):**
+**Goal:** To add sophisticated capabilities that enhance the development workflow.
+
+### Requirements Addressed in this Milestone
+
+- **Advanced Validation:**
+  - Cross-project pattern recognition
+  - Advanced quality gates and metrics
+  - Performance analysis and optimization suggestions
+- **User Stories Fulfilled:**
+  - "As a Human Architect, I want advanced code analysis capabilities..."
+
+## Milestone 9: Future & Experimental Features
+
+**Goal:** To explore experimental features and advanced AI capabilities that could evolve the SDD system.
+
+### Experimental Features for Research
+
+- **Agent Self-Introspection & Learning:**
+  - Agents analyze their own performance and decision-making
+  - Generate retrospective documents identifying process improvements
+  - Learn from failures and successes across projects
+
+- **Intelligent Pattern Recognition:**
+  - Store cross-project patterns in `~/.sdd/preferences/` (user-level patterns)  
+  - Analyze past project choices to suggest intelligent defaults
+  - Transform "What do you want?" into "Continue using X like last time?"
+
+- **Advanced Notifications & Analytics:**
+  - Sophisticated hook system with rich event data
+  - Performance analytics and bottleneck identification
+  - Predictive failure detection and prevention
+
+- **Cross-Project Intelligence:**
+  - Learn technology stack patterns, quality approaches, UX patterns
+  - Team-level pattern sharing and collaboration
+  - Community pattern libraries and best practice propagation
+
+### Example Vision: Pattern Learning Evolution
+
+**Current State:**
 ```
 SDD: "What package manager do you want for Python?"
 SDD: "What testing framework should we use?"
-SDD: "How should we handle error messages?"
 ```
 
-**After (Pattern Learning):**
+**Future State:**
 ```
 SDD: "I see you've used UV in 3 recent Python projects. Continue with UV? [Y/n]"
-SDD: "Use pytest + coverage like your last 2 projects? [Y/n]"  
-SDD: "Apply your standard CLI error message patterns? [Y/n]"
+SDD: "Use pytest + coverage like your last 2 projects? [Y/n]"
 ```
 
-### Future Considerations
+### Research Areas
 
-- **Team-Level Patterns:** How to handle shared team preferences vs individual patterns
+- **Team vs Individual Patterns:** Balancing personal preferences with team standards
 - **Pattern Evolution:** How preferences change over time and technology trends
-- **Pattern Sharing:** Potential for community pattern sharing and best practice propagation
+- **Agent Coordination:** Advanced multi-agent collaboration and learning
+- **Quality Prediction:** Using historical data to predict task success/failure
 
-*Note: This milestone represents the evolution from "specification creation" to "specification validation" through learned intelligence.*
+*Note: This milestone contains experimental features that may or may not be implemented based on research findings and user feedback.*
