@@ -58,6 +58,15 @@ description: "Template for detailed milestone execution planning"
 
 * A slice should be small enough to be completed in a short amount of time but large enough to deliver coherent value.
 * Each slice must be independently testable.
+* **Each slice should solve a user problem in the simplest possible way** - avoid over-engineering or complex solutions when simple ones work.
+
+**Task Description Requirements:**
+
+* **Never use single sentences** - they hide complexity and enable misinterpretation
+* **Each task needs _at least_ a full paragraph** explaining the complete scope, key challenges, and critical decisions
+* **Think end-to-end** - describe the complete workflow, not just the technical component
+* **Surface hidden complexity** - what seems simple but is actually complex?
+* **Include edge cases** - what could go wrong and how do we handle it?
 
 ---
 
@@ -70,10 +79,22 @@ description: "Template for detailed milestone execution planning"
   * **Then** a new user record is created in the database,
   * **And** they are redirected to the login page with a success message.
 * **Task Sequence:**
-    1. **TASK-001:** Create `users` table in the database with `id`, `email`, `password_hash`.
-    2. **TASK-002:** Create API endpoint `POST /api/users` for user signup.
-    3. **TASK-003:** Build frontend signup page with a form for email and password.
-    4. **TASK-004:** Write an end-to-end test that simulates the full signup flow.
+
+**TASK-001: Create user database schema with security and extensibility**
+
+This task establishes the foundational data model for user management that must handle both immediate signup needs and future authentication features. The schema includes user identification, secure password storage, account status tracking, and extensibility for future features like email verification, roles, and profile data. Critical considerations include password hash storage using bcrypt with proper salt rounds, unique constraints on email with case-insensitive handling, account status flags for email verification and deactivation, created/updated timestamps for audit trails, and database indexes for performance. The implementation must also consider data migration paths for future schema changes and comply with data protection requirements.
+
+**TASK-002: Build secure user registration API endpoint with validation and error handling**
+
+This task creates the API endpoint that handles user registration with comprehensive input validation, security measures, and proper error responses. The endpoint validates email format and uniqueness, enforces password strength requirements, implements rate limiting to prevent abuse, handles edge cases like duplicate registrations gracefully, and provides clear error messages without revealing security information. The implementation includes input sanitization to prevent injection attacks, proper HTTP status codes for different scenarios, audit logging for security monitoring, and integration with the database layer with proper transaction handling.
+
+**TASK-003: Create responsive signup page with real-time validation and accessibility**
+
+This task builds the frontend signup interface that provides an excellent user experience while collecting the necessary information securely. The page includes real-time email validation with duplicate checking, password strength indicators with helpful guidance, accessible form design following WCAG guidelines, responsive layout for mobile and desktop, proper form submission handling with loading states, and clear error display with specific field-level feedback. The implementation handles network failures gracefully, prevents double-submission, and provides keyboard navigation support.
+
+**TASK-004: Implement comprehensive end-to-end testing covering success and failure scenarios**
+
+This task creates automated tests that verify the complete signup flow works correctly across all scenarios including successful registration, validation errors, server failures, and edge cases. The tests cover happy path user journey from page load to successful registration, email validation with various invalid formats, password validation with weak passwords, duplicate email handling, network failure recovery, and accessibility compliance verification. The implementation includes both automated browser tests and API-level integration tests to ensure reliability.
 
 ---
 
@@ -86,10 +107,22 @@ description: "Template for detailed milestone execution planning"
   * **Then** the system returns a session token (e.g., a JWT),
   * **And** they are redirected to their dashboard.
 * **Task Sequence:**
-    1. **TASK-005:** Create API endpoint `POST /api/sessions` for user login.
-    2. **TASK-006:** Build frontend login page and handle session token storage.
-    3. **TASK-007:** Create a protected API endpoint that requires a valid session token.
-    4. **TASK-008:** Write an end-to-end test for the login flow and accessing a protected resource.
+
+**TASK-005: Create secure authentication API endpoint with session management**
+
+This task builds the authentication endpoint that verifies user credentials and establishes secure sessions. The endpoint handles email/password validation against stored user records, implements secure password comparison using constant-time operations to prevent timing attacks, generates secure session tokens (JWT or similar) with appropriate expiration times, implements login attempt rate limiting to prevent brute force attacks, and handles various authentication failure scenarios with appropriate error responses. The implementation includes session token structure with user claims, token refresh mechanisms for long-lived sessions, secure token storage considerations, and integration with password reset workflows.
+
+**TASK-006: Build secure login interface with session token handling and user feedback**
+
+This task creates the frontend login experience that securely collects credentials and manages authentication state. The interface includes secure credential collection with proper form handling, client-side session token storage using secure methods (httpOnly cookies or secure localStorage), authentication state management across page loads and navigation, clear user feedback for login success/failure scenarios, and proper handling of expired or invalid sessions. The implementation addresses browser security considerations, provides loading states during authentication, handles network failures gracefully, and includes logout functionality with proper session cleanup.
+
+**TASK-007: Implement authentication middleware and protected route infrastructure**
+
+This task establishes the security infrastructure that protects application resources and validates user sessions. The middleware verifies session tokens on each protected request, handles token expiration and refresh logic, provides consistent authentication state to application components, implements proper authorization checking for different user roles/permissions, and includes audit logging for security monitoring. The implementation covers token validation performance optimization, graceful degradation for authentication service failures, and integration patterns for protecting both API endpoints and frontend routes.
+
+**TASK-008: Create comprehensive authentication testing covering security scenarios and user flows**
+
+This task builds automated tests that verify authentication works correctly and securely across all scenarios including successful login, failed authentication attempts, session management, and security edge cases. The tests cover successful authentication flow with proper session establishment, invalid credential handling with appropriate error messages, session token validation and expiration scenarios, concurrent session handling, security testing for common vulnerabilities (CSRF, session fixation, etc.), and user experience testing for authentication state management. The implementation includes both security-focused testing and user journey validation.
 
 ---
 > `[...add more slices as needed...]`
