@@ -94,43 +94,67 @@ If any required specification is missing, guide the user to complete their speci
    - "Avoid these identified pitfalls: [list from retrospectives]"
    - "Account for these discovered complexities: [specific factors from experience]"
 
-## Phase 3: Iterative Discovery Process
+## Phase 3: Strategic Thinking and Reality-Checking Process
 
-**CRITICAL**: Use multi-phase discovery conversation to prevent over-engineering and ensure concrete, implementable plans.
+**CRITICAL**: Transform from document generator to strategic thinking facilitator. Refuse shallow thinking and force deep implementation reality consideration.
 
-### Step 3.1: Initial Analysis & Hypothesis Formation
+### Step 3.1: Initial Analysis & Strategic Challenge Formation
 **Main Agent → Milestone Planning Specialist**:
 "Analyze project context and create:
 1. Initial hypothesis about milestone goals and key capabilities
 2. Rough feature/task list with rationale for each
-3. Strategic questions needing user input for concrete specification  
-4. Complexity assessment using simplicity principles and template examples"
+3. **MANDATORY**: Strategic challenges for EVERY proposed task asking 'How does this actually work end-to-end?'
+4. Reality-check questions challenging assumptions about 'simple' implementation
+5. Context separation analysis - what needs separate execution contexts and why
+6. Edge case identification for both simple and complex project scenarios"
 
 **Quality Gate**: Main Agent verifies specialist output contains:
-- Questions that are specific and actionable (not abstract)
-- Rough plan follows simplicity principles from Phase 2.5
-- Features clearly leverage existing infrastructure where possible
-- 5-10 strategic questions for user clarification
+- **Strategic challenges** that question implementation assumptions for every task
+- **Reality-check questions** that force consideration of actual execution details
+- **Context separation analysis** identifying development vs validation vs user contexts
+- **Edge case scenarios** for both simple (Obsidian plugin) and complex (ktrdr-level) projects
+- Concrete file operations, user interactions, and integration patterns specified
 
-### Step 3.2: User Discovery Conversation
-**Main Agent ↔ User**:
-- Present rough plan and strategic questions conversationally
-- Explore each feature in detail - get specific about files, commands, integration points
-- Challenge complexity: "Could we use existing X instead of building Y?"
-- Document specific implementation decisions and approaches
-- Continue until concrete implementation approaches are clear
+### Step 3.2: Strategic Challenging Conversation
+**Main Agent ↔ User** - Become the strategic challenger:
+- Present rough plan then **CHALLENGE EVERY ASSUMPTION**
+- For each proposed task ask: "How does this actually work end-to-end?"
+- Challenge vocabulary: "What exactly do you mean by [vague term]?"
+- Force edge case thinking: "How does this handle [complex scenario]?"
+- Question context: "Does this need separate Claude Code instances? Why?"
+- Demand implementation specifics: "What files? What user interactions? What error handling?"
+- Continue until **NO TASK can be misinterpreted**
 
-### Step 3.3: Iteration Decision Point
-**Specialist Assessment**: "Do I have enough concrete detail to create atomic tasks?"
-- **If NO**: Generate more targeted questions focusing on implementation specifics
-- **If YES**: Proceed to detailed milestone plan creation with discovered constraints
+### Step 3.3: Deep Task Description Requirement
+**MANDATORY QUALITY GATE**: Each task must have:
+- **Full paragraph minimum** explaining complete implementation scope
+- **Technical implementation details** - exact files, logic, integration points
+- **User interaction patterns** - specific conversation flows, confirmations, error scenarios
+- **Edge case handling** - how it works for both simple and complex scenarios
+- **Context separation** - what execution contexts are needed and why
+- **Validation criteria** - specific, measurable success criteria
 
-### Step 3.4: Detailed Plan Creation with Discovered Constraints
-**Main Agent → Specialist**: Create detailed milestone plan using:
-- All discovered implementation specifics as requirements (not suggestions)
-- Simplicity principles and anti-pattern constraints from Phase 2.5
-- Historical learnings from Phase 2.6
-- Concrete integration approaches from discovery conversation
+**If ANY task is a single sentence or lacks implementation details → REJECT and re-challenge**
+
+### Step 3.4: Reality vs Idealism Validation
+**Main Agent must verify each task addresses:**
+- **Simple scenario** (e.g., Obsidian plugin): How does this work for straightforward projects?
+- **Complex scenario** (e.g., ktrdr): How does this handle multi-service, polyglot, complex architectures?
+- **Error conditions**: What goes wrong and how do we handle it?
+- **Context pollution**: Does this need separate Claude Code instances to avoid mixing development and validation contexts?
+- **Learning transfer**: How do validation results improve the system?
+
+### Step 3.5: Strategic Question Protocol
+**For EVERY task, Main Agent must ask:**
+1. "How does this actually work end-to-end?"
+2. "What are the most likely ways this could be implemented wrong?"
+3. "What edge cases exist that could break this?"
+4. "Does this need context separation? Why?"
+5. "How do we know this task succeeded?"
+6. "What files does this touch? What user interactions occur?"
+7. "How does this handle both simple and complex projects?"
+
+**Continue strategic questioning until user provides implementation-level detail for every task**
 
 ## Phase 4: Hybrid Document Generation - Milestone Plan Creation
 
@@ -143,19 +167,28 @@ If any required specification is missing, guide the user to complete their speci
 1. **Main Agent → Milestone Planning Sub-Agent**: Use Task tool to invoke "milestone-planning-specialist" with:
    - Complete roadmap analysis and milestone context
    - Project specifications (Vision, Requirements, Architecture) for context
-   - Target milestone identification and basic context validation from Phase 2
-   - **CRITICAL**: Let the specialist analyze documents, identify gaps, and generate strategic questions
-   - Instruction to act as milestone planning specialist who analyzes existing documents first, then creates actionable plans and identifies strategic gaps
+   - **ALL strategic questioning results** and implementation details discovered in Phase 3
+   - **MANDATORY**: Requirement to create detailed task descriptions (full paragraphs minimum with technical implementation details)
+   - **CRITICAL**: Template compliance with updated SDD templates requiring end-to-end thinking
+   - Instruction: "You are NOT a document generator. You are a strategic implementation planner. Every task needs implementation-level detail."
 
 2. **Milestone Planning Sub-Agent → Main Agent**: Specialist returns:
-   - Complete draft milestone plan document following SDD template structure (`specs/templates/4_Milestone_Plan_Template.md`)
-   - **Numbered strategic questions** highlighting specification gaps and needed clarifications
-   - Critical self-review identifying assumptions, risks, or missing elements
-   - Vertical slice breakdown with task sequences using proper TASK-XXX identifiers
+   - Complete draft milestone plan document following updated SDD template structure (`specs/templates/4_Milestone_Plan_Template.md`)
+   - **VERIFICATION**: Every task has full paragraph with technical implementation, user interaction, and edge case details
+   - **NO single-sentence tasks allowed** - reject any shallow descriptions
+   - Vertical slice breakdown with detailed task sequences using proper TASK-XXX identifiers
+   - Context separation requirements and validation criteria for each task
 
 3. **Main Agent ↔ User**: Present specialist's strategic questions in conversation, gather detailed answers and refinements
+   - **REFUSE to accept shallow answers** - ask follow-up questions until implementation is clear
+   - **Challenge every vague response** with "What exactly do you mean by [term]?"
+   - **Demand concrete specifics** for files, user interactions, error handling, edge cases
+   - **Continue questioning** until every task has implementation-level clarity
 
 4. **Iterate**: Return to Milestone Planning Sub-Agent with user answers to refine plan until solid, comprehensive, and executable
+   - **MANDATORY**: Multiple rounds of refinement until NO task can be misinterpreted
+   - **Quality check**: Each iteration must improve task description detail and clarity
+   - **User confirmation required**: "Are you confident a developer could implement this without guessing?"
 
 **Milestone Plan Must Include:**
 - **Goals & Success Criteria**: Clear statement of milestone objectives with measurable criteria
@@ -173,32 +206,39 @@ If any required specification is missing, guide the user to complete their speci
 **Iterative Process:**
 
 1. **Main Agent → Task Blueprint Sub-Agent**: Use Task tool to invoke "task-blueprint-specialist" with:
-   - Complete approved milestone plan document
+   - Complete approved milestone plan document with detailed task descriptions
    - Vertical slice definitions with task sequences
    - Project architecture patterns and constraints
-   - Instruction to act as task blueprint specialist who creates detailed, executable task specifications
+   - **CRITICAL**: Instruction to extend milestone task descriptions with MORE implementation detail, not repeat them
+   - Emphasis on simplicity: only add details that help agents avoid real mistakes
 
 2. **Task Blueprint Sub-Agent → Main Agent**: Specialist returns:
    - Individual task blueprint files for each TASK-XXX identified in the milestone plan
-   - Each blueprint following SDD task blueprint template structure (`specs/templates/5_Task_Blueprint_Template.md`)
-   - **Numbered strategic questions** if any task specifications need clarification
-   - Quality validation report ensuring task blueprints are atomic, executable, and consistent
+   - Each blueprint following updated SDD task blueprint template structure (`specs/templates/5_Task_Blueprint_Template.md`)
+   - **Extension approach**: Start with milestone paragraph, add discovered implementation details
+   - **Agent-focused sections**: Only filled if specific, valuable information exists
+   - Quality validation report ensuring blueprints extend (not repeat) milestone descriptions
 
-3. **Main Agent ↔ User**: Present any specialist questions, gather clarifications, and confirm task breakdown approach
+3. **Main Agent ↔ User**: **MANDATORY** - Present ALL specialist questions with hypotheses to the Human Architect
+   - **Never answer specialist questions autonomously** - always involve the human
+   - Present questions in specialist's format: hypotheses with reasoning, then ask for user choice
+   - Gather human clarifications and decisions about implementation approaches
+   - Confirm task breakdown approach and any discovered requirements
 
-4. **Iterate**: Return to Task Blueprint Sub-Agent with user feedback to refine blueprints until all tasks are well-specified and executable
+4. **Iterate**: Return to Task Blueprint Sub-Agent with **human feedback only** to refine blueprints until all tasks are well-specified and executable
+   - Pass human decisions back to specialist, not Main Agent interpretations
+   - Continue until human confirms all task blueprints are clear and implementable
 
 5. **MANDATORY VERIFICATION**: Before completing, Main Agent must verify that each generated task blueprint:
-   - **Exactly matches** the corresponding TASK-XXX description from the approved milestone plan
-   - **Aligns with** the specified task sequence and slice goals
-   - **References correct** architectural patterns and requirements from milestone context
-   - **Does not hallucinate** requirements not present in the milestone plan
+   - **Starts with the exact milestone task description** then extends it with additional detail
+   - **Adds value through specifics** rather than generic template-filling
+   - **References concrete project elements** (existing files, documented patterns, architectural decisions)
+   - **Does not invent complexity** to fill template sections
 
 **Task Blueprints Must Include:**
-- **Task Overview & Goal**: Clear purpose and context for each task
-- **The Contract**: Specific Given/When/Then acceptance criteria that are testable
-- **Context Bundle Manifest**: Required context files for Bundler, Security, and Validator agents
-- **Verification Context**: Testing and validation requirements for each task
+- **Task Description**: Exact milestone description plus discovered implementation details
+- **Implementation Guidance**: Only specific guidance discovered through specialist analysis
+- **Success Criteria**: Specific Given/When/Then acceptance criteria based on discovered requirements
 
 ## Phase 6: Deliverable Creation & Validation
 
